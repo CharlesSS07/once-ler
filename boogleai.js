@@ -1,19 +1,20 @@
-const tmp = require('tmp');
-// tmp.setGracefulCleanup();
-const fs = require('fs');
 
-const { Blob, blobFrom, blobFromSync, File, fileFrom, fileFromSync } = require('node-fetch');
+import fetch, {
+  //Blob,
+  FormData,
+  //blobFrom,
+  //blobFromSync,
+  File,
+  //fileFrom,
+  //fileFromSync,
+} from 'node-fetch'
 
 function get_boogle_reply(user_id, website_domain, query_message, query_document_html_text) {
   
-  const tmpFileObject = tmp.fileSync({prefix: 'webpage-', postfix: '.txt' });
-  const tmpPath = tmpFileObject.name;
-  fs.writeFileSync(tmpPath, Buffer.from(query_document_html_text, 'utf8'));
-  console.log(tmpPath);
-
-  let formData = new FormData();
-  formData.append("files", new Buffer.File(query_document_html_text, tmpPath));
+  const formData = new FormData()
+  formData.append("files", new File([query_document_html_text], 'tmp.txt', { type: 'text/plain'}), 'tmp.txt');
   formData.append("question", query_message);
+  formData.append("sessionId", user_id+"/"+website_domain);
   
   async function query(formData) {
     const response = await fetch(
@@ -27,10 +28,6 @@ function get_boogle_reply(user_id, website_domain, query_message, query_document
     return result;
   }
   
-  return query(formData).then((response) => {
-    console.log(response);
-    // tmpFileObject.removeCallback();
-    return response;
-  });
+  return query(formData);
 }
-module.exports = { get_boogle_reply };
+export { get_boogle_reply };

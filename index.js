@@ -1,7 +1,7 @@
 
-const boogleai = require('./boogleai.js');
+import * as boogleai from './boogleai.js';
 
-const express = require("express");
+import express from 'express';
 
 const app = express ();
 

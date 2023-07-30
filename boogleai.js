@@ -9,12 +9,13 @@ import fetch, {
   //fileFromSync,
 } from 'node-fetch'
 
-function get_boogle_reply(user_id, website_domain, query_message, query_document_html_text) {
+async function get_boogle_reply(user_id, website_domain, query_message, query_document_html_text) {
   
   const formData = new FormData()
   formData.append("files", new File([query_document_html_text], 'tmp.txt', { type: 'text/plain'}), 'tmp.txt');
   formData.append("question", query_message);
-  formData.append("sessionId", user_id+"/"+website_domain);
+  //formData.append("sessionId", user_id+"/"+website_domain);
+  formData.append("pineconeNamespace", website_domain);
   
   async function query(formData) {
     const response = await fetch(

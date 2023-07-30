@@ -38,7 +38,7 @@ msgerForm.addEventListener("submit", event => {
   .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
   console.log(postProcessedHTML.length);
   
-  fetch('https://65d3-79-154-28-191.ngrok-free.app/query', {
+  fetch('https://a4e8-95-39-227-100.ngrok-free.app/query', { // <-- change this url domain to the proper ngrok server you started
     method: "POST",
     mode: "cors",
     headers: {

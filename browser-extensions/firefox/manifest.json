@@ -17,5 +17,5 @@
     }
   ],
   
-  "host_permissions": [ "*://65d3-79-154-28-191.ngrok-free.app/*" ]
+  "host_permissions": [ "*://*.ngrok-free.app/*" ]
 }

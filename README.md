@@ -27,7 +27,18 @@ This is the inspiration for the boogle browser assistant.
  - **Legitimate Login Portal:** use wix or some other platform to manage user settings, and provided downloads to the browser extension
  - **Tools:** Add tools to the flowise chat setup to make the bot even more handy
 
-# bugs
+## bugs
  1. **Data Leaks** database is not cleared between different domains. databases should only hold session pertaining to the user, the domain, and the conversation
    - this causes information from unrelated pages to leak across in conversation in unexpected ways
  2. **Chat History not Persistent** there's no database storing chat history so information stored in the chat is not persistent, including the users language, and name
+
+## running
+You will need nodejs. I'm not sure how nodejs will get the modules I installed but it has a list of the required ones.
+
+Runs off of flowise server: `npx flowise start --LOG_LEVEL=debug --DEBUG=true`, which servers on port 3000, and allows us to modify the lang chain chat model that calls openai and such.
+
+With the main server being `node index.json`, which serves on port 8000.
+
+I am using an ngrok url which is hard coded into manifes.json, and scrip.json to access my api on port 8000.
+
+Let me know what else you need to get it running.

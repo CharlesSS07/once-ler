@@ -38,7 +38,8 @@ msgerForm.addEventListener("submit", event => {
   .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
   console.log(postProcessedHTML.length);
   
-  fetch('https://a4e8-95-39-227-100.ngrok-free.app/query', { // <-- change this url domain to the proper ngrok server you started
+   fetch('https://601c-155-98-131-2.ngrok-free.app/query', { // <-- change this url domain to the proper ngrok server you started
+//  fetch('http://127.0.0.1:8000/query', {
     method: "POST",
     mode: "cors",
     headers: {
@@ -47,7 +48,7 @@ msgerForm.addEventListener("submit", event => {
       "Access-Control-Allow-Method": "POST, OPTIONS",
       "Access-Control-Allow-Headers": "*"
     },
-    body: JSON.stringify({message: msgText, document: postProcessedHTML})
+    body: JSON.stringify({message: msgText, document: postProcessedHTML, page: window.location.href})
   }).then(async (chatCompletion) => {
     appendMessage("boogle-BOT", "https://i0.wp.com/bane-tech.com/wp-content/uploads/2015/10/google-font-b.jpg", "left", (await chatCompletion.json()).message);
   }); 

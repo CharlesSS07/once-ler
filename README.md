@@ -1,12 +1,16 @@
-# boogle
-The boogle browser assistant is a browser extension which allows the user to pull out their desired information from any given website using only a natural language query.
+# once-ler
+
+The once-ler harvests websites like truffula trees. There is no Lorax. UNLESS.
+
+# description
+The once-ler browser assistant is a browser extension which allows the user to pull out their desired information from any given website using only a natural language query.
 This is meant to replace the need for reading/skimming entire web pages for answers to simple questions.
 For instance, the University of Utah hosts the residency web page for informing students of the rules behind attaining tuition for residency purposes.
 The webpage is so big that the school also employs people on email systems to answer questions which are detailed on the webpage.
 This expensive solution costs the student time since they must now wait an average of up to 3 weeks for this employee to respond.
 The solution could be automated, saving the student time and reducing the need for an employee who reads web pages all day.
 The automation would look something like a chatbot which interprets information directly from the website.
-This is the inspiration for the boogle browser assistant.
+This is the inspiration for the once-ler browser assistant.
 
 ## improvements
  - **Look & Feel:** improves look of chat interface

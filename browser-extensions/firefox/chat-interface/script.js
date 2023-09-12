@@ -50,7 +50,7 @@ msgerForm.addEventListener("submit", event => {
     },
     body: JSON.stringify({message: msgText, document: postProcessedHTML, page: window.location.href})
   }).then(async (chatCompletion) => {
-    appendMessage("boogle-BOT", "https://i0.wp.com/bane-tech.com/wp-content/uploads/2015/10/google-font-b.jpg", "left", (await chatCompletion.json()).message);
+    appendMessage("once-ler-BOT", "https://i0.wp.com/bane-tech.com/wp-content/uploads/2015/10/google-font-b.jpg", "left", (await chatCompletion.json()).message);
   }); 
 
 });

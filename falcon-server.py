@@ -12,6 +12,8 @@ class EnglishQueryEndpoint:
         
         page = req.media['page']
         
+        print(req)
+        
         # resp.body = 
 
 

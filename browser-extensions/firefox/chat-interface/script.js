@@ -38,7 +38,7 @@ msgerForm.addEventListener("submit", event => {
   .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
   console.log(postProcessedHTML.length);
   
-   fetch('https://ass-blaster-69.campus.utah.edu/query', { // <-- change this url domain to the proper ngrok server you started
+   fetch('https://ass-blaster-69.campus.utah.edu:8000/query', { // <-- change this url domain to the proper ngrok server you started
 //  fetch('http://127.0.0.1:8000/query', {
     method: "POST",
     mode: "cors",

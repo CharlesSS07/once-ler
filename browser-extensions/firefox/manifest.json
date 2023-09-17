@@ -17,5 +17,5 @@
     }
   ],
   
-  "host_permissions": [ "*://ass-blaster-69.campus.utah.edu/*" ]
+  "host_permissions": [ "*://ass-blaster-69.campus.utah.edu:8000/*" ]
 }

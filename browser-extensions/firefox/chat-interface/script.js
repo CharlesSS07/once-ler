@@ -38,19 +38,20 @@ msgerForm.addEventListener("submit", event => {
   .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
   console.log(postProcessedHTML.length);
   
-   fetch('https://ass-blaster-69.campus.utah.edu:8000/query', { // <-- change this url domain to the proper ngrok server you started
-//  fetch('http://127.0.0.1:8000/query', {
+  fetch('https://ass-blaster-69.campus.utah.edu:8000/query', {
     method: "POST",
-    mode: "cors",
+    // referrerPolicy: "unsafe-url",
+    // mode: "cors",
     headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Method": "POST, OPTIONS",
-      "Access-Control-Allow-Headers": "*"
+      // "Access-Control-Request-Method": "POST",
+      // "Access-Control-Allow-Headers": "*",
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({message: msgText, document: postProcessedHTML, page: window.location.href})
   }).then(async (chatCompletion) => {
     appendMessage("once-ler-BOT", "https://i0.wp.com/bane-tech.com/wp-content/uploads/2015/10/google-font-b.jpg", "left", (await chatCompletion.json()).message);
+  }).catch(err => {
+    console.error(err);
   }); 
 
 });

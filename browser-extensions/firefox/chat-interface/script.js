@@ -38,7 +38,7 @@ msgerForm.addEventListener("submit", event => {
   .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
   console.log(postProcessedHTML.length);
   
-  fetch('https://ass-blaster-69.campus.utah.edu:8000/query', {
+  fetch('https://0d37-155-100-47-3.ngrok.io/query', {
     method: "POST",
     // referrerPolicy: "unsafe-url",
     // mode: "cors",

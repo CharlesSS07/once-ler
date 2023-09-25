@@ -1,40 +1,27 @@
 
 import falcon
-import falcon.asgi
+
+import assistant
 
 class ChatQueryEndpoint:
 
-    async def on_post(self, req, resp):
+    def on_post(self, req, resp):
 
-        resp.set_header('Access-Control-Allow-Origin', '*')
-        resp.set_header('Access-Control-Allow-Methods', '*')
-        resp.set_header('Access-Control-Allow-Headers', '*')
+#        resp.set_header('Access-Control-Allow-Origin', '*')
+#        resp.set_header('Access-Control-Allow-Methods', '*')
+#        resp.set_header('Access-Control-Allow-Headers', '*')
         
-        user_id = 'neo'
-        
+        user_id = req.media['user_id']
         message = req.media['message']
-        
         html_document = req.media['document']
-        
         page = req.media['page']
         
-        print(req)
+        resp.media = {'messages': assistant.on_message(user_id, message, html_document, page)}
         
-        # resp.body = 
-
-    async def process_request(self, req, resp):
-        print(resp.headers)
-        resp.set_header('Access-Control-Allow-Origin', '*')
-        resp.set_header('Access-Control-Allow-Methods', '*')
-        resp.set_header('Access-Control-Allow-Headers', '*')
         resp.status = falcon.HTTP_200
-        # resp.set_header('Access-Control-Max-Age', 1728000)  # 20 days
-        if req.method == 'OPTIONS':
-            print('recieved options')
-            return
-            # raise falcon.http_status.HTTPStatus(falcon.HTTP_200, body='\n')
+        resp.complete = True
 
-app = falcon.asgi.App(
+app = falcon.App(
     cors_enable=True # allows any endpoint to be accessed by the browser, could be insecure if that's not what we want
 )
 app.add_route('/query', ChatQueryEndpoint())

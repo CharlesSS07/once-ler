@@ -15,32 +15,36 @@ msgerForm.addEventListener("submit", event => {
 
   const documentClone = document.cloneNode(true);
   documentClone.body.removeChild(documentClone.getElementById('chatinterface'));
-  documentClone.querySelectorAll('style').forEach((element) => {
-    element.remove();
-  });
-  documentClone.querySelectorAll('script').forEach((element) => {
-    element.remove();
-  });
-  
-  // remove all class=... and style= ... from HTML before sending off
-  // this gets rid of lots of nearly useless text
-  // we want to remove as much as possibile to speed up GPT call, and transfer speeds
-  let postProcessedHTML = documentClone.body.innerHTML;
-  console.log(postProcessedHTML.length);
-  postProcessedHTML = postProcessedHTML.replaceAll(/(<[a-z]+.*?)(class=".*?")(.*?>)/g, // to remove all class=...
-  (_, g1, g2, g3) => {
-    return `${g1.trim()} ${g3.trim()}`;
-  })
-  .replaceAll(/(<[a-z]+.*?)(style=".*?")(.*?>)/g, // to remove all style=...
-  (_, g1, g2, g3) => {
-    return `${g1.trim()} ${g3.trim()}`;
-  })
-  .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
+//  documentClone.querySelectorAll('style').forEach((element) => {
+//    element.remove();
+//  });
+//  documentClone.querySelectorAll('script').forEach((element) => {
+//    element.remove();
+//  });
+//
+//  // remove all class=... and style= ... from HTML before sending off
+//  // this gets rid of lots of nearly useless text
+//  // we want to remove as much as possibile to speed up GPT call, and transfer speeds
+//  let postProcessedHTML = documentClone.body.innerHTML;
+//  console.log(postProcessedHTML.length);
+//  postProcessedHTML = postProcessedHTML.replaceAll(/(<[a-z]+.*?)(class=".*?")(.*?>)/g, // to remove all class=...
+//  (_, g1, g2, g3) => {
+//    return `${g1.trim()} ${g3.trim()}`;
+//  })
+//  .replaceAll(/(<[a-z]+.*?)(style=".*?")(.*?>)/g, // to remove all style=...
+//  (_, g1, g2, g3) => {
+//    return `${g1.trim()} ${g3.trim()}`;
+//  })
+//  .replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
+
+  var article = new Readability(documentClone).parse();
+  let postProcessedHTML = article.textContent;
+  console.log(postProcessedHTML);
   console.log(postProcessedHTML.length);
     
   const user_id = 'neo';
   
-  fetch('https://1ef9-155-98-131-2.ngrok-free.app/query', {
+  fetch('https://1f49-155-98-131-2.ngrok-free.app/query', {
     method: "POST",
     mode: "cors",
     headers: {
@@ -56,7 +60,7 @@ msgerForm.addEventListener("submit", event => {
     )
   }).then(async (chatCompletion) => {
 //     console.log(await chatCompletion.text());
-      const messages = (await chatCompletion.json()).messages;
+      const messages = (await chatCompletion.json()).messages.replace('\n', '<br>');
       console.log(messages);
       for (const i in messages) {
           const message = messages[i];

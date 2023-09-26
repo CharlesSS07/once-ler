@@ -12,10 +12,10 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["chat-interface/section.html.js", "chat-interface/script.js"],
+      "js": ["chat-interface/section.html.js", "chat-interface/script.js", "readability-0.4.4/Readability.js" ],
       "css": ["chat-interface/style.css"]
     }
   ],
   
-  "host_permissions": [ "*://0d37-155-100-47-3.ngrok.io/*" ]
+  "host_permissions": [ "*://1f49-155-98-131-2.ngrok-free.app/*" ]
 }

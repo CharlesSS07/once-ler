@@ -64,6 +64,9 @@ class Agent(ProperNoun):
     
     def get_name(self):
         return self.agent_name
+        
+#    def comment(self, chat_session):
+#        
 
 class AgentChatMessage():
     
@@ -91,8 +94,9 @@ class AgentChatSession():
         self.member_list[user.user_id] = user
         
     def get_context(self):
-        users = [ self.member_list[a].get_name() for a in self.member_list if type(a)==User ]
-        agents = [ self.member_list[a].get_name() for a in self.member_list if type(a)==Agent ]
+        users = [ self.member_list[a].get_name() for a in self.member_list if type(self.member_list[a])==User ]
+        agents = [ self.member_list[a].get_name() for a in self.member_list if type(self.member_list[a])==Agent ]
+        print(len(users), print(len(agents)))
         ret = f'''The following is a transcript from a conversation with the following user(s):
 {', '.join(users)}
 And the following chat bot agent(s):
@@ -101,7 +105,7 @@ And the following chat bot agent(s):
     
     def get_agent_response(self, agent, record_response=True):
         self.member_list[agent.agent_name] = agent
-        prompt = self.get_context() + '\n' + agent.context + '\nTranscript:'+ '\n\n' + self.composite_message_history() + '\n' + agent.agent_name + ': '
+        prompt = self.get_context() + '\n' + agent.context + '\n\nTranscript:\n' + self.composite_message_history() + '\n' + agent.agent_name + ': '
         print('Prompt:')
         print(prompt)
         response = agent.model.predict(
@@ -110,7 +114,7 @@ And the following chat bot agent(s):
             **agent.prediction_parameters
         )
         message = AgentChatMessage(
-            content=response.text,
+            content=response.text.strip(),
             agent_name=agent.agent_name
         )
         if record_response:
@@ -170,8 +174,34 @@ def InternalThoughtAgent():
         }
     )
 
-def DelagationAgent(chat_session, default_agent, agents_description_lookup):
-    description_categories_string = '\n'.join([ a + ': ' + agents_description_lookup[a] for a in agents ])
+def EndofConversationAgent():
+    return Agent(
+        model=language_model,
+        context='You are a customer service personell who is making the ending remarks to a conversation.',
+        agent_name='Mr. Byebye',
+        prediction_parameters={
+            'max_output_tokens':256,
+            'temperature':0,
+            'top_p':0.8,
+            'top_k':40
+        }
+    )
+
+def DoubtAgent():
+    return Agent(
+        model=language_model,
+        context='You are a chat bot who doubts the statements of other chat bots. Explain what you doubt and why you doubt it.',
+        agent_name='Mr. Doubful',
+        prediction_parameters={
+            'max_output_tokens':256,
+            'temperature':0,
+            'top_p':0.8,
+            'top_k':40
+        }
+    )
+
+def delegate_agents(chat_session, default_agent, agents_description_lookup):
+    description_categories_string = '\n'.join([ a + ': ' + agents_description_lookup[a].context for a in agents_description_lookup ])
     agent = Agent(
         model=language_model,
         context=f'''You are a customer service agent fowarding a customer to the best customer service worker to take care of their request. Respond with one of the following options, using the description of what the worker specializes in to select the best worker for the customer request.
@@ -188,9 +218,12 @@ Worker: ''',
         }
     )
     
-    k = chat_session.get_agent_response(agent, record_response=False).content
-    if k in agents_description_lookup.keys():
-        return agents_description_lookup[k]
+    response_agent = chat_session.get_agent_response(agent, record_response=False).content
+    for k in agents_description_lookup.keys():
+        if k in response_agent or response_agent in k:
+            print(response_agent, 'found')
+            return agents_description_lookup[k]
+    print(response_agent, 'not found')
     return default_agent
 
 def on_message(user_id, message, html_document, page):
@@ -225,25 +258,35 @@ def on_message(user_id, message, html_document, page):
     rephase_agent = RephraseQuestionAgent()
     thought_agent = InternalThoughtAgent()
     qaagent = QAAgent()
+    eoc = EndofConversationAgent()
+    doubtagent = DoubtAgent()
     
-#    leader = DelagationAgent(
-#        [more_information_agent, rephase_agent, thought_agent, qaagent]
-#    )
+#    for i in range(10):
 #
+#        delegate = delegate_agents(
+#            chat_session,
+#            eoc,
+#            { a.agent_name: a for a in [ more_information_agent, rephase_agent, thought_agent, qaagent, eoc, doubtagent ] }
+#        )
 #
+#        message_from_delegate = chat_session.get_agent_response(delegate)
+#        new_messages.append(message_from_delegate.to_dict())
+#
+#        if delegate==eoc:
+#            return new_messages
     
     message_from_more_information_agent = chat_session.get_agent_response(more_information_agent)
     new_messages.append(message_from_more_information_agent.to_dict())
-    
+
     if not 'LOOKS GOOD!' in message_from_more_information_agent.content:
         return new_messages
-    
+
     message_from_rephase_agent = chat_session.get_agent_response(rephase_agent)
     new_messages.append(message_from_rephase_agent.to_dict())
-    
+
     message_from_thought_agent = chat_session.get_agent_response(thought_agent)
     new_messages.append(message_from_thought_agent.to_dict())
-    
+
     message_from_qaagent = chat_session.get_agent_response(qaagent)
     new_messages.append(message_from_qaagent.to_dict())
     

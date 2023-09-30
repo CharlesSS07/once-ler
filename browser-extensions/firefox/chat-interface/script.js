@@ -59,8 +59,7 @@ msgerForm.addEventListener("submit", event => {
         }
     )
   }).then(async (chatCompletion) => {
-//     console.log(await chatCompletion.text());
-      const messages = (await chatCompletion.json()).messages.replace('\n', '<br>');
+      const messages = (await chatCompletion.json()).messages;
       console.log(messages);
       for (const i in messages) {
           const message = messages[i];
@@ -71,9 +70,9 @@ msgerForm.addEventListener("submit", event => {
           }
           appendMessage(
               message.name,
-              "https://i0.wp.com/bane-tech.com/wp-content/uploads/2015/10/google-font-b.jpg",
+              "https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png",
               "left",
-              message.content
+              message.content.replace('\n', '<br>')
           );
       }
   }).catch(err => {
@@ -83,13 +82,17 @@ msgerForm.addEventListener("submit", event => {
 });
 
 function appendMessage(name, img, side, text) {
-  //   Simple solution for small apps
-  const msgHTML = `
+    //   Simple solution for small apps
+    let imgHTML = `<div class="msg-img" style="background-image: url(${img})"></div>`;
+    if (side=='right') {
+        imgHTML = '';
+    }
+    const msgHTML = `
     <div class="msg ${side}-msg">
-      <div class="msg-img" style="background-image: url(${img})"></div>
+      ${imgHTML}
 
       <div class="msg-bubble">
-  
+
           <div class="msg-info">
               <div class="msg-info-name">${name}</div>
               <div class="msg-info-time">${formatDate(new Date())}</div>
@@ -114,7 +117,7 @@ function formatDate(date) {
 // Dragging code stolen from: https://www.w3schools.com/howto/howto_js_draggable.asp
 
 function dragElement(elmnt, handle) {
-  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+  var pos1 = 0, pos2 = 0, pos3 = 0, pos4 =0;
   handle.onmousedown = dragMouseDown;
 
   function dragMouseDown(e) {

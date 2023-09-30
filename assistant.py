@@ -1,6 +1,7 @@
+import time
 
 import vertexai
-from vertexai.language_models import ChatModel, InputOutputTextPair, ChatSession, ChatMessage, TextGenerationModel
+from vertexai.language_models import TextGenerationModel, TextEmbeddingModel
 
 vertexai.init(project="stone-botany-397219", location="us-central1")
 
@@ -11,9 +12,9 @@ vertexai.init(project="stone-botany-397219", location="us-central1")
 #print(f"Response from Model: {response.text}")
 #print(chat.message_history)
 
-chat_model = ChatModel.from_pretrained("chat-bison")
+#chat_model = ChatModel.from_pretrained("chat-bison")
 language_model = TextGenerationModel.from_pretrained("text-bison")
-
+embedding_model = TextEmbeddingModel.from_pretrained("textembedding-gecko@001")
 #chat = chat_model.start_chat(
 #    context="""You are a customer service representative helping an internet user understand a website.""",
 #    examples=[
@@ -44,7 +45,7 @@ class User(ProperNoun):
     
     def load_chat_session(self):
         self.chat_session = AgentChatSession(
-            message_history=[]  # since there is no database of old messages currently...
+            message_history=MessageHistory()  # since there is no database of old messages currently...
         )
         return self.chat_session
     
@@ -68,29 +69,80 @@ class Agent(ProperNoun):
 #    def comment(self, chat_session):
 #        
 
-class AgentChatMessage():
+class GroupChatMessage():
     
-    def __init__(self, content, agent_name):
+    def __init__(self, content, sender):
         self.content = content
-        self.agent_name = agent_name
+        self.sender = sender
+        self.timestamp = time.time()
     
     def get_formatted_message(self):
-        return self.agent_name+': '+self.content
+        return self.sender.get_name()+': '+str(self.content)
     
     def to_dict(self):
-        return {'content': self.content, 'name': self.agent_name}
+        return {'content': self.content, 'name': self.sender.get_name(), 'timestamp': self.timestamp}
+
+class MessageHistory():
+    '''
+    Tracks messages in a single conversation. Uses a permissions system to return a subset of
+    messages which the accessor is "allowed" to see. This allows for the construction of complex
+    message histories which are different for different accessors. A feature such as this is
+    useful for group chat bots because not every chat bot should be able to see the thoughts,
+    ramblings, and auxiliary information of every other chat bot. Doing so allows me to create
+    even bigger group chats.
+    '''
+    
+    public_scope = object()
+    
+    class ScopedGroupChatMessage():
+        
+        def __init__(self, message, scopes):
+            self.message = message
+            self.scopes = scopes
+    
+    def __init__(self):
+        self.scopes = {MessageHistory.public_scope: set()}
+        self.message_history = []
+    
+    def register_agent(self, agent):
+        self.add_to_scope(agent, MessageHistory.public_scope)
+    
+    def add_to_scope(self, agent, scope_key):
+        if not scope_key in self.scopes.keys():
+            self.scopes[scope_key] = set()
+        self.scopes[scope_key].add(agent)
+        
+    def get_visible_messages(self, agent_accessor):
+        for m in self.message_history:
+            print(m.message.content)
+            for scope in m.scopes:
+                print(scope)
+                if scope in self.scopes.keys() and agent_accessor in self.scopes[scope]:
+                    print('match found!')
+                    yield m.message
+                    break # don't return same message twice if agent is in multiple scopes
+    
+    def text_transcript(self, agent_accessor):
+        return '\n'.join(
+        [ m.get_formatted_message() for m in self.get_visible_messages(agent_accessor) ])
+    
+    def full_text_transcript(self):
+        return '\n'.join(
+        [ m.get_formatted_message() for m in self.message_history ])
+    
+    def send_message(self, message, access_scopes=None):
+        if access_scopes==None:
+            access_scopes = [MessageHistory.public_scope]
+        self.message_history.append(MessageHistory.ScopedGroupChatMessage(message, access_scopes))
 
 class AgentChatSession():
     
     def __init__(self, message_history):
         self.message_history = message_history
         self.member_list = dict()
-        
-    def composite_message_history(self):
-        return '\n'.join([m.get_formatted_message() for m in self.message_history])
     
     def user_message_event(self, user, message):
-        self.message_history.append(message)
+        self.message_history.send_message(message)
         self.member_list[user.user_id] = user
         
     def get_context(self):
@@ -105,7 +157,7 @@ And the following chat bot agent(s):
     
     def get_agent_response(self, agent, record_response=True):
         self.member_list[agent.agent_name] = agent
-        prompt = self.get_context() + '\n' + agent.context + '\n\nTranscript:\n' + self.composite_message_history() + '\n' + agent.agent_name + ': '
+        prompt = agent.context + '\n' + self.get_context() + '\n\nTranscript:\n' + self.message_history.text_transcript(agent) + '\n' + agent.agent_name + ': '
         print('Prompt:')
         print(prompt)
         response = agent.model.predict(
@@ -113,12 +165,12 @@ And the following chat bot agent(s):
             stop_sequences=[ self.member_list[a].get_name()+':' for a in self.member_list ],
             **agent.prediction_parameters
         )
-        message = AgentChatMessage(
+        message = GroupChatMessage(
             content=response.text.strip(),
-            agent_name=agent.agent_name
+            sender=agent
         )
         if record_response:
-            self.message_history.append(message)
+            self.message_history.send_message(message)
         return message
         
 
@@ -226,6 +278,38 @@ Worker: ''',
     print(response_agent, 'not found')
     return default_agent
 
+more_information_agent = RequestMoreInformationAgent()
+rephase_agent = RephraseQuestionAgent()
+thought_agent = InternalThoughtAgent()
+qaagent = QAAgent()
+eoc = EndofConversationAgent()
+doubtagent = DoubtAgent()
+
+import os
+from urllib.parse import urlparse
+import json
+import numpy as np
+data_dir = os.path.join(os.path.split(__file__)[0], 'VectorizedWebsites')
+def load_vectordb(url_str):
+    
+    URL = urlparse(url_str)
+    
+    website_dir = os.path.join(data_dir, URL.hostname, URL.path[1:])
+    
+    # check if website_dir exists...
+    
+    embeddings = []
+    texts = []
+    with open(os.path.join(website_dir, 'embeddings.jsonl'), 'r') as f:
+        for line in f.readlines():
+            data = json.loads(line)
+            embeddings.append(data['embedding'])
+            texts.append(data['text'])
+    
+    return np.array(texts), np.array(embeddings).astype(float)
+
+utah_residency_page_chunks, utah_residency_page_embeddings = load_vectordb('https://admissions.utah.edu/information-resources/residency/residency-state-exceptions/')
+
 def on_message(user_id, message, html_document, page):
     
     # should lock threads on user_id
@@ -235,6 +319,9 @@ def on_message(user_id, message, html_document, page):
     else:
         user = User(user_id)
         user.load_chat_session()
+        for agent in [more_information_agent, rephase_agent, thought_agent, qaagent, eoc, doubtagent, user]:
+            user.chat_session.message_history.register_agent(agent)
+#            user.chat_session.message_history.add_to_scope(agent, 'user')
         users[user_id] = user
     
     escape_code = '%EVAL' # <-- hella dangerous
@@ -250,16 +337,28 @@ def on_message(user_id, message, html_document, page):
     
     new_messages = []
     
-    message_from_user = AgentChatMessage(content=message, agent_name=user.user_id)
+    message_from_user = GroupChatMessage(content=message, sender=user)
     new_messages.append(message_from_user.to_dict())
     chat_session.user_message_event(user, message_from_user)
     
-    more_information_agent = RequestMoreInformationAgent()
-    rephase_agent = RephraseQuestionAgent()
-    thought_agent = InternalThoughtAgent()
-    qaagent = QAAgent()
-    eoc = EndofConversationAgent()
-    doubtagent = DoubtAgent()
+    # embed message and look up similar ones
+    message_embedding = np.array(embedding_model.get_embeddings([message])[0].values).astype(float)
+    chunk_rank = np.dot(message_embedding, utah_residency_page_embeddings.T)
+    print('chunk_rank', chunk_rank[np.argsort(chunk_rank)[::-1][:7]])
+    background_info = '\n'.join(utah_residency_page_chunks[np.argsort(chunk_rank)[::-1][:7]])
+    print("Background Info:", background_info)
+    
+    if chunk_rank[-1]>0.55:
+        class BackgroundSupplier(ProperNoun):
+            def get_name(self):
+                return "Mr. Background"
+        
+        chat_session.message_history.send_message(
+            GroupChatMessage(
+                content=background_info,
+                sender=BackgroundSupplier()
+            )
+        )
     
 #    for i in range(10):
 #

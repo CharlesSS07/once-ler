@@ -12,7 +12,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["chat-interface/section.html.js", "chat-interface/script.js", "readability-0.4.4/Readability.js" ],
+      "js": [ "readability-0.4.4/Readability.js", "chat-interface/section.html.js", "chat-interface/script.js" ],
       "css": ["chat-interface/style.css"]
     }
   ],

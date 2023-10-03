@@ -1,41 +1,38 @@
 
 import requests
 from urllib.parse import urlparse
-from readability import Document
 from bs4 import BeautifulSoup
+import pandas as pd
 import os
-import gc
 import json
 import math
-
-data_dir, _ = os.path.split(__file__)
+import functools
+import time
+from concurrent.futures import ThreadPoolExecutor
+from typing import Generator, List, Tuple
+import numpy as np
+from tqdm.auto import tqdm
 
 import vertexai
 from vertexai.language_models import TextEmbeddingModel, TextEmbeddingInput
-
 vertexai.init(project="stone-botany-397219", location="us-central1")
 
+cache_dir = os.path.join(os.path.split(__file__), 'cache')
+
+def get_website_cache(url:str):
+    
+    URL = urlparse(url)
+    
+    website_dir = os.path.join(cache_dir, URL.hostname, URL.path[1:]) # strip leading / off of path
+    
+    return website_dir
+
 # Define an embedding method that uses the model # stolen from https://colab.research.google.com/github/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/official/matching_engine/sdk_matching_engine_create_stack_overflow_embeddings_vertex.ipynb#scrollTo=9b01baa906b5
-from typing import List, Optional
-
-# Load the "Vertex AI Embeddings for Text" model
-from vertexai.preview.language_models import TextEmbeddingModel
-
-from typing import List, Optional
 
 # Load the "Vertex AI Embeddings for Text" model
 from vertexai.preview.language_models import TextEmbeddingModel
 
 model = TextEmbeddingModel.from_pretrained("textembedding-gecko@001")
-
-import functools
-import time
-from concurrent.futures import ThreadPoolExecutor
-from typing import Generator, List, Tuple
-
-import numpy as np
-from tqdm.auto import tqdm
-
 
 # Generator function to yield batches of sentences
 def generate_batches(
@@ -87,106 +84,106 @@ def encode_texts_to_embeddings(sentences: List[str]) -> List[Optional[List[float
     except Exception:
         return [None for _ in range(len(sentences))]
 
-import numpy as np
-from tqdm.auto import tqdm
+#def recursive_split(text, max_length, split_characters, final_split_character):
+#
+#    text = text.strip()
+#    if len(text)<max_length:
+#        return text
+#
+#    if len(split_characters)==0:
+#        chunked = text.split(final_split_character)
+#        half_split_idx = len(chunked)//2
+#        first_half_chunk = final_split_character.join(chunked[:half_split_idx]).strip()
+#        second_half_chunk = final_split_character.join(chunked[half_split_idx:]).strip()
+#        if len(first_half_chunk)<=max_length:
+#            yield first_half_chunk
+#            return
+#        else:
+#            for chunk_i in recursive_split(first_half_chunk, max_length, [], final_split_character):
+#                yield chunk_i
+#            return
+#        if len(second_half_chunk)<=max_length:
+#            yield second_half_chunk
+#            return
+#        else:
+#            for chunk_i in recursive_split(second_half_chunk, max_length, [], final_split_character):
+#                yield chunk_i
+#            return
+#
+#    for chunk in text.split(split_characters[0]):
+#        chunk = chunk.strip()
+#        if len(chunk)<=max_length:
+#            yield chunk
+#        else:
+#            for chunk_i in recursive_split(chunk, max_length, split_characters[1:], final_split_character):
+#                yield chunk_i
 
-def recursive_split(text, max_length, split_characters, final_split_character):
+def overlap_split(text, max_chunk_size, chunk_overlap):
     
-    text = text.strip()
-    if len(text)<max_length:
-        return text
+    l = len(text)
+    
+    i = max_chunk_size
+    yield text[:max_chunk_size]
+    
+    while True:
+        yield text[ i - chunk_overlap : i + max_chunk_size + chunk_overlap ]
+        if i + max_chunk_size + chunk_overlap > l:
+            break
+        i += max_chunk_size
 
-    if len(split_characters)==0:
-        chunked = text.split(final_split_character)
-        half_split_idx = len(chunked)//2
-        first_half_chunk = final_split_character.join(chunked[:half_split_idx]).strip()
-        second_half_chunk = final_split_character.join(chunked[half_split_idx:]).strip()
-        if len(first_half_chunk)<=max_length:
-            yield first_half_chunk
-            return
-        else:
-            for chunk_i in recursive_split(first_half_chunk, max_length, [], final_split_character):
-                yield chunk_i
-            return
-        if len(second_half_chunk)<=max_length:
-            yield second_half_chunk
-            return
-        else:
-            for chunk_i in recursive_split(second_half_chunk, max_length, [], final_split_character):
-                yield chunk_i
-            return
+def parse(url:str, page_text: str, page_html: str = None):
     
-    for chunk in text.split(split_characters[0]):
-        chunk = chunk.strip()
-        if len(chunk)<=max_length:
-            yield chunk
-        else:
-            for chunk_i in recursive_split(chunk, max_length, split_characters[1:], final_split_character):
-                yield chunk_i
+    website_dir = get_website_cache(url)
     
-
-def scrape_website(url_str):
+    if os.path.exists(website_dir):
+        # have already scraped this site...
+        return # "cached"...
     
-    URL = urlparse(url_str)
-    
-    website_dir = os.path.join(data_dir, URL.hostname, URL.path[1:]) # strip leading / off of path
-    
-    os.makedirs(website_dir) # error on already existing page scrape?
+    os.makedirs(website_dir)
     
     print('Writing website to:', website_dir)
     
-    page_content = requests.get(url_str).text#content#.decode("utf-8")
+    if page_html is None:
+        page_html = requests.get(url).text
     
     with open(os.path.join(website_dir, 'content.html'), 'w') as f:
-        f.write(page_content)
+        f.write(page_html)
     
-    page_content_doc = Document(page_content)
-    page_content_dom = BeautifulSoup(page_content_doc.content().strip("'b"), features="lxml") # summary remove all the junk in the html, leaves just the article
-    page_content_text = page_content_dom.get_text() # removes the html from the article
+    with open(os.path.join(website_dir, 'content.txt'), 'w') as f:
+        f.write(page_text)
     
-    with open(os.path.join(website_dir, 'text_content'), 'w') as f:
-        f.write(page_content_text.replace('\\n', ' ').replace('\n', ' ').replace('\t', ' ').replace('  ', ' ').replace('  ', ' '))
+    # page_DOM = BeautifulSoup(page_html, features="lxml")
+    # parse out links, buttons, etc.
+    
+    # TODO: make another table of links/buttons in the page, and the href text or surrounding text for the link/button
+    # TODO: make a page summary txt (for pages smaller than x) by summarizing overlapping chunks into a running summary
+    # TODO: perhaps a second page summary which takes into account all the href text used by links which lead to it
     
     # now, chunk the doc for vectorization
     
-    max_chunk_size = 500
-    # recursive_split(page_content_text, max_chunk_size, ['\n\n\n', '\n\n', '\n'], '. ')
-    chunks = [ c
-        for c in page_content_text
-        .replace('\\n', ' ').replace('\n', ' ')
-        .replace('\\t', ' ').replace('\t\t', '').replace('\t\t', '').replace('\t\t', '').replace('\t', ' ')
-        .replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ')
-        .replace('  ', ' ').replace('  ', ' ').replace('  ', ' ').replace('  ', ' ')
-        .split('. ')
-        if len(c)!=0
-    ]
+    max_chunk_size = 100
+    chunks = list(overlap_split(page_text, max_chunk_size, 50))
     
     print(chunks)
     
-    embeddings = []
-    for c, e in tqdm(
-        zip(
+    embeddings = pd.DataFrame(columns=['embeddings', 'chunks'])
+    for i, (c, e) in tqdm(
+        enumerate(zip(
             chunks,                         # , task_type='RETRIEVAL_QUERY'
             encode_text_to_embedding_batched([ TextEmbeddingInput(text=c) for c in chunks ])[1]
-        ),
+        )),
         total=len(chunks),
         desc="Chunk --> Embedding",
     ):
-        id_chunk = str(hash(c))
         
         # Append to file
-        embeddings.append(json.dumps(
-            {
-                "id": id_chunk,
-                "embedding": [str(value) for value in e],
-                "text": c
-            }
-        ))
-        
-    with open(os.path.join(website_dir, 'embeddings.jsonl'), "a") as f:
-        f.write('\n'.join(embeddings))
+        embeddings.loc[i] = {
+            "embeddings": e,
+            "chunks": c
+        }
     
+    embeddings.to_pickle(os.path.join(website_dir, 'embeddings.pkl'))
 
 #scrape_website('https://en.wikipedia.org/wiki/Murshidabad')
 
-scrape_website('https://admissions.utah.edu/information-resources/residency/residency-state-exceptions/')
+#parse('https://admissions.utah.edu/information-resources/residency/residency-state-exceptions/', 'XYZ', 'XYZ')

@@ -7,7 +7,15 @@ async function parsePage() {
     documentClone.body.removeChild(documentClone.getElementById('chatinterface'));
     
     var article = new Readability(documentClone).parse();
-    let postProcessedHTML = await article.textContent;
+    let postProcessedHTML = await article.content;
+//    .textContent
+//    .replace(/\\\\n/g, '\n')
+//    .replace(/\\\\t/g, '\n')
+//    .replace(/\\n/g, '\t')
+//    .replace(/\\t/g, '\t')
+//    .replace(/\n\n\n[\n]+/g, '')
+//    .replace(/\t\t\t[\t]+/g, '')
+//    .replace(/  [ ]+/g, ' ');
 
     fetch(
         'https://1f49-155-98-131-2.ngrok-free.app/parse_page', {
@@ -19,7 +27,7 @@ async function parsePage() {
             body: JSON.stringify(
                 {
                     user_id: user_id,
-                    document: await document.body.innerHTML,
+                    document: document.documentElement.outerHTML,
                     text: postProcessedHTML,
                     url: window.location.href
                 }
@@ -95,7 +103,7 @@ msgerForm.addEventListener("submit", event => {
         for (const i in messages) {
             const message = messages[i];
             console.log(message);
-            if (message.name==user_id) {
+            if (message.name=="User") {
                 // maybe mark as processed?
                 continue;
             }
@@ -118,7 +126,6 @@ function appendMessage(name, img, side, text) {
     if (side=='right') {
         imgHTML = '';
     }
-    console.log(text)
     const msgHTML = `<div class="msg ${side}-msg">
     ${imgHTML}
 

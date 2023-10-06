@@ -15,10 +15,16 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import Generator, List, Tuple, Optional
 import numpy as np
 from tqdm.auto import tqdm
+import yaml
 
-import vertexai
-from vertexai.language_models import TextEmbeddingModel, TextEmbeddingInput
-vertexai.init(project="stone-botany-397219", location="us-central1")
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import cos_sim
+
+embedding_model = SentenceTransformer('thenlper/gte-large')
+
+#import vertexai
+#from vertexai.language_models import TextEmbeddingModel, TextEmbeddingInput
+#vertexai.init(project="stone-botany-397219", location="us-central1")
 
 cache_dir = os.path.join(os.path.split(__file__)[0], 'cache')
 if not os.path.exists(cache_dir):
@@ -30,79 +36,78 @@ def get_website_cache_file(url:str, filename):
     
     sep = '|'
     
-    path = [URL.hostname, *[ f for f in URL.path.split('/') if len(f)!=0 ], filename]
+    path = [URL.hostname, *[ f for f in URL.path.split('/') if len(f)!=0 ], '.'+filename]
     
     website_dir = os.path.join(cache_dir, sep.join(path)) # strip leading / off of path
     
-#    print(website_dir, path)
     return website_dir
 
 # Define an embedding method that uses the model # stolen from https://colab.research.google.com/github/GoogleCloudPlatform/vertex-ai-samples/blob/main/notebooks/official/matching_engine/sdk_matching_engine_create_stack_overflow_embeddings_vertex.ipynb#scrollTo=9b01baa906b5
 
-# Load the "Vertex AI Embeddings for Text" model
-from vertexai.preview.language_models import TextEmbeddingModel
+## Load the "Vertex AI Embeddings for Text" model
+#from vertexai.preview.language_models import TextEmbeddingModel
+#
+#model = TextEmbeddingModel.from_pretrained("textembedding-gecko@001")
+#
+## Generator function to yield batches of sentences
+#def generate_batches(
+#    sentences: List[str], batch_size: int
+#) -> Generator[List[str], None, None]:
+#    for i in range(0, len(sentences), batch_size):
+#        yield sentences[i : i + batch_size]
 
-model = TextEmbeddingModel.from_pretrained("textembedding-gecko@001")
 
-# Generator function to yield batches of sentences
-def generate_batches(
-    sentences: List[str], batch_size: int
-) -> Generator[List[str], None, None]:
-    for i in range(0, len(sentences), batch_size):
-        yield sentences[i : i + batch_size]
+#def encode_text_to_embedding_batched(
+#    sentences: List[str], api_calls_per_second: int = 10, batch_size: int = 5
+#) -> Tuple[List[bool], np.ndarray]:
+#
+#    embeddings_list: List[List[float]] = []
+#
+#    # Prepare the batches using a generator
+#    batches = generate_batches(sentences, batch_size)
+#
+#    seconds_per_job = 1 / api_calls_per_second
+#
+#    with ThreadPoolExecutor() as executor:
+#        futures = []
+#        for batch in tqdm(
+#            batches, total=math.ceil(len(sentences) / batch_size), position=0
+#        ):
+#            futures.append(
+#                executor.submit(functools.partial(encode_texts_to_embeddings), batch)
+#            )
+#            time.sleep(seconds_per_job)
+#
+#        for future in futures:
+#            embeddings_list.extend(future.result())
+#
+#    is_successful = [
+#        embedding is not None for sentence, embedding in zip(sentences, embeddings_list)
+#    ]
+##    if len(embeddings_list)>0:
+##        embeddings_list_successful = np.squeeze(
+##            np.stack(embeddings_list)
+##        )
+##        return is_successful, embeddings_list_successful
+#    return is_successful, embeddings_list
+#
+## Define an embedding method that uses the model
+#def encode_texts_to_embeddings(sentences: List[str]) -> List[Optional[List[float]]]:
+#    try:
+#        embeddings = model.get_embeddings(sentences)
+#        return [embedding.values for embedding in embeddings]
+#    except Exception:
+#        return [None for _ in range(len(sentences))]
 
-
-def encode_text_to_embedding_batched(
-    sentences: List[str], api_calls_per_second: int = 10, batch_size: int = 5
-) -> Tuple[List[bool], np.ndarray]:
-
-    embeddings_list: List[List[float]] = []
-
-    # Prepare the batches using a generator
-    batches = generate_batches(sentences, batch_size)
-
-    seconds_per_job = 1 / api_calls_per_second
-
-    with ThreadPoolExecutor() as executor:
-        futures = []
-        for batch in tqdm(
-            batches, total=math.ceil(len(sentences) / batch_size), position=0
-        ):
-            futures.append(
-                executor.submit(functools.partial(encode_texts_to_embeddings), batch)
-            )
-            time.sleep(seconds_per_job)
-
-        for future in futures:
-            embeddings_list.extend(future.result())
-
-    is_successful = [
-        embedding is not None for sentence, embedding in zip(sentences, embeddings_list)
-    ]
-#    if len(embeddings_list)>0:
-#        embeddings_list_successful = np.squeeze(
-#            np.stack(embeddings_list)
-#        )
-#        return is_successful, embeddings_list_successful
-    return is_successful, embeddings_list
-
-# Define an embedding method that uses the model
-def encode_texts_to_embeddings(sentences: List[str]) -> List[Optional[List[float]]]:
-    try:
-        embeddings = model.get_embeddings(sentences)
-        return [embedding.values for embedding in embeddings]
-    except Exception:
-        return [None for _ in range(len(sentences))]
-
-def pre_chunk_clean(text):
+def pre_chopping_clean(text):
     text = re.sub(r'\\\\n', '\n', text)
     text = re.sub(r'\\\\t', '\t', text)
     text = re.sub(r'\\n', '\n', text)
     text = re.sub(r'\\t', '\t', text)
-    text = re.sub(r'\n\n[\n]+', '\n\n', text) # replace 2+ \n with 2 \n
-    text = re.sub(r'\t\t[\t]+', '\t\t', text) # replace 2+ \t with 2 \t
-    text = re.sub(r'  [ ]+', '  ', text) # replace 2+ spaces with 2 spaces
-    text = re.sub(r'---[-]+', '', text) # replace 3+ - with ---
+    text = re.sub(r'[\n]+', '\n', text) # replace 2+ \n with 2 \n
+    text = re.sub(r'[\t]+', '\t\t', text) # replace 2+ \t with 2 \t
+    text = re.sub(r' [ ]+', '  ', text) # replace 2+ spaces with 2 spaces
+    text = re.sub(r'--[-]+', '', text) # replace 3+ - with ---
     return text
 
 #def recursive_split(text, max_length, split_characters, final_split_character):
@@ -144,10 +149,10 @@ def overlap_split(text, max_chunk_size, chunk_overlap):
     l = len(text)
     
     i = max_chunk_size
-    yield text[:max_chunk_size]
+    yield text[:max_chunk_size].strip()
     
     while True:
-        yield text[ i - chunk_overlap : i + max_chunk_size + chunk_overlap ]
+        yield text[ i - chunk_overlap : i + max_chunk_size + chunk_overlap ].strip()
         if i + max_chunk_size + chunk_overlap > l:
             break
         i += max_chunk_size
@@ -162,30 +167,50 @@ def parse(url:str, page_readability_html: str, page_document_html: str):
     document = BeautifulSoup(page_document_html, features="lxml")
     document.find(id='chatinterface').decompose() # remove the chat interface
     
-    for element in document.find('script'):
+    for element in document.find_all('script'):
         element.decompose()
-    for element in document.find('noscript'):
+    for element in document.find_all('noscript'):
+        element.decompose()
+    for element in document.find_all('style'):
         element.decompose()
     
     with open(get_website_cache_file(url, 'content.html'), 'w') as f:
         f.write(page_document_html)
     
     with open(get_website_cache_file(url, 'content.html.md'), 'w') as f:
-        f.write(pre_chunk_clean(md(str(document.find('body')))))
+        f.write(
+            pre_chopping_clean(
+                md(str(document.find('body')))
+            )
+        )
     
     with open(get_website_cache_file(url, 'content.readability.html'), 'w') as f:
         f.write(page_readability_html)
     
-    page_text = pre_chunk_clean(md(page_readability_html))
+    page_text = pre_chopping_clean(md(page_readability_html))
+    
     with open(get_website_cache_file(url, 'content.readability.md'), 'w') as f:
-        f.write(page_text)
+        f.write(str(page_text))
     
     # parse out links, buttons, etc.
-    metas = [ meta.attrs['content'] for meta in document.find_all('meta') if 'name' in meta.attrs and 'description' in meta.attrs['name'] ]
-    titles = [ e.get_text() for e in document.find_all('title') ]
+    # use pythonic types so that yaml acts nicley
+    metas =   list(sorted(set([ meta.attrs['content'].strip() for meta in document.find_all('meta') if 'name' in meta.attrs and 'description' in meta.attrs['name'] ])))
+    titles =  list(sorted(set([ e.get_text().strip() for e in document.find_all('title') ])))
+    links =   list(sorted(set([ l['href'] for l in document.find_all('a', href=True) ])))
+    buttons = list(sorted(set([ b.text for b in document.find_all('button') ]))) # maybe get the surrounding text too?
     
     print('Meta Titles', titles)
     print('Meta Tag Descriptions',  metas)
+    print('Links', links)
+    print('Buttons', buttons)
+    
+    with open(get_website_cache_file(url, 'meta.yaml'), 'w') as f:
+        yaml.dump({
+            'titles': titles,
+            'descriptions': metas,
+            'links': links
+#            'button_chunks', buttons
+        }, f)
     
     # TODO: make another table of links/buttons in the page, and the href text or surrounding text for the link/button
     # TODO: make a page summary txt (for pages smaller than x) by summarizing overlapping chunks into a running summary
@@ -193,32 +218,51 @@ def parse(url:str, page_readability_html: str, page_document_html: str):
     
     # now, chunk the doc for vectorization
     
-    max_chunk_size = 200
-    chunks = list(overlap_split(page_text, max_chunk_size, 100))
+    max_chunk_size = 312 # make sure things add up to 512, which is the window size of embedding model...
+    chunks = list(overlap_split(page_text, max_chunk_size, 100)) # 100 + 312 + 100 = 512
     
-    print(chunks)
+    print([ len(c) for c in chunks ])
+    print(sum([ len(c) for c in chunks ]), len(page_text))
+    
+#    print('...\n\n\n\n...'.join(chunks))
     
 #    embeddings = pd.DataFrame(columns=['embeddings', 'chunks'])
     with open(get_website_cache_file(url, 'content.readability.md.embeddings.json'), 'a') as f:
         for i, (c, e) in tqdm(
-            enumerate(zip(
-                chunks,                         # , task_type='RETRIEVAL_QUERY'
-                encode_text_to_embedding_batched([ TextEmbeddingInput(text=c) for c in chunks ])[1]
-            )),
+            enumerate(zip(chunks, embedding_model.encode(chunks))),
             total=len(chunks),
-            desc="Chunk --> Embedding",
+            desc="Chunk --> Embedding"
         ):
             embeddings_formatted = [
                 json.dumps(
                     {
-#                        "id": hash(c),
-                        "embedding": e,
-                        "chunk": c,
-#                        "site": url
+                        'i':i,
+                        "embedding": [ str(ei) for ei in e.astype(float)],
+                        "chunk": c
                     }
                 ) + '\n'
             ]
             f.writelines(embeddings_formatted)
+#        for i, (c, e) in tqdm(
+#            enumerate(zip(
+#                chunks,                         # , task_type='RETRIEVAL_QUERY'
+#                encode_text_to_embedding_batched([ TextEmbeddingInput(text=c) for c in chunks ])[1]
+#            )),
+#            total=len(chunks),
+#            desc="Chunk --> Embedding",
+#        ):
+#            embeddings_formatted = [
+#                json.dumps(
+#                    {
+#                        'i':i,
+##                        "id": hash(c),
+#                        "embedding": e,
+#                        "chunk": c
+##                        "site": url
+#                    }
+#                ) + '\n'
+#            ]
+#            f.writelines(embeddings_formatted)
         
         # Append to file
 #        embeddings.loc[i] = {
@@ -228,10 +272,6 @@ def parse(url:str, page_readability_html: str, page_document_html: str):
     
 #    embeddings.to_pickle(os.path.join(website_dir, 'embeddings.pkl'))
 
-#scrape_website('https://en.wikipedia.org/wiki/Murshidabad')
-
-#parse('https://admissions.utah.edu/information-resources/residency/residency-state-exceptions/', 'XYZ', 'XYZ')
-
 def load_website_vectors(url: str):
     
     # check if website_dir exists...
@@ -239,5 +279,6 @@ def load_website_vectors(url: str):
     with open(get_website_cache_file(url, 'content.readability.md.embeddings.json'), 'r') as f:
         for i, line in enumerate(f.readlines()):
             embeddings.loc[i] = json.loads(line)
+            embeddings.loc[i].embedding = np.array(embeddings.loc[i].embedding).astype(float)
     return embeddings
 #    return pd.read_pickle(os.path.join(get_website_cache(url), 'embeddings.pkl'))

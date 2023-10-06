@@ -9,7 +9,11 @@ vertexai.init(project="stone-botany-397219", location="us-central1")
 
 import agents
 
-embedding_model = TextEmbeddingModel.from_pretrained("textembedding-gecko@001")
+#embedding_model = TextEmbeddingModel.from_pretrained("textembedding-gecko@001")
+
+from sentence_transformers import SentenceTransformer
+from sentence_transformers.util import cos_sim
+embedding_model = SentenceTransformer('thenlper/gte-large')
 
 users = {}
 
@@ -161,11 +165,13 @@ def on_user_message(user_id, message, page):
         page_data = VectorizedWebsites.load_website_vectors(page)
         
         # embed message and look up similar ones
-        message_embedding = np.array(embedding_model.get_embeddings([message])[0].values).astype(float)
-        chunk_rank = np.dot(message_embedding, np.array(list(page_data.embedding)).T)
+        message_embedding = embedding_model.encode([message])[0].astype(float)
+        chunk_rank = np.array(cos_sim(message_embedding, np.array(list(page_data.embedding))))[0]
         chunk_rank_order = np.argsort(chunk_rank)[::-1][:7]
         print('chunk_rank_ordered', chunk_rank[chunk_rank_order])
         top_chunks = page_data.chunk[chunk_rank_order]
+        
+        print("Pre-Strip:", top_chunks[chunk_rank[chunk_rank_order]>0.65])
         background_info = '\n'.join([
             strip_info(chunk, message)
             for chunk in top_chunks[chunk_rank[chunk_rank_order]>0.65]

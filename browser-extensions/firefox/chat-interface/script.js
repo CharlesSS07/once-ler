@@ -1,24 +1,16 @@
 
 const user_id = 'neo';
 
-async function parsePage() {
+async function on_page_load() {
     
     const documentClone = document.cloneNode(true);
     documentClone.body.removeChild(documentClone.getElementById('chatinterface'));
     
     var article = new Readability(documentClone).parse();
     let postProcessedHTML = await article.content;
-//    .textContent
-//    .replace(/\\\\n/g, '\n')
-//    .replace(/\\\\t/g, '\n')
-//    .replace(/\\n/g, '\t')
-//    .replace(/\\t/g, '\t')
-//    .replace(/\n\n\n[\n]+/g, '')
-//    .replace(/\t\t\t[\t]+/g, '')
-//    .replace(/  [ ]+/g, ' ');
 
     fetch(
-        'https://1f49-155-98-131-2.ngrok-free.app/parse_page', {
+        'https://1f49-155-98-131-2.ngrok-free.app/on_page_load', {
             method: "POST",
             mode: "cors",
             headers: {
@@ -36,25 +28,54 @@ async function parsePage() {
     );
 }
 
-parsePage();
+on_page_load();
+
+var md2HTMLconverter = new showdown.Converter({
+    tasklists: true,
+    encodeEmails: true,
+    emoji: true,
+    openLinksInNewWindow: true
+});
+md2HTMLconverter.setFlavor('github');
+function markup(text) {
+    try {
+        let html = md2HTMLconverter.makeHtml(text);
+        // do markdown in-browser. this makes links work, code, etc.
+        console.log(html);
+        return $('<div/>')
+        .html(html)
+        .linkify()
+        .html();
+        
+    } catch (e) {
+        console.log('could not markup.');
+        console.error(e);
+        return text;
+    }
+}
+
 
 // chat interface stolen from: https://codepen.io/sajadhsm/pen/odaBdd
 
 const msgerForm = document.querySelector(".msger-inputarea");
 const msgerInput = document.querySelector(".msger-input");
 const msgerChat = document.querySelector(".msger-chat");
-
 msgerForm.addEventListener("submit", event => {
     event.preventDefault();
 
     const msgText = msgerInput.value;
     if (!msgText) return;
 
-    appendMessage("You", "https://media.istockphoto.com/id/1298261537/vector/blank-man-profile-head-icon-placeholder.jpg?s=170667a&w=is&k=20&c=OySd4zJilw82P4k-sQ72kYckL122oUiy5Z5VTnFQi90=", "right", msgText);
+    appendMessage(
+        "You",
+        "https://media.istockphoto.com/id/1298261537/vector/blank-man-profile-head-icon-placeholder.jpg?s=170667a&w=is&k=20&c=OySd4zJilw82P4k-sQ72kYckL122oUiy5Z5VTnFQi90=",
+        "right",
+        markup(msgText)
+    );
     msgerInput.value = "";
 
-    const documentClone = document.cloneNode(true);
-    documentClone.body.removeChild(documentClone.getElementById('chatinterface'));
+    //const documentClone = document.cloneNode(true);
+    //documentClone.body.removeChild(documentClone.getElementById('chatinterface'));
     //documentClone.querySelectorAll('style').forEach((element) => {
     //element.remove();
     //});
@@ -77,10 +98,10 @@ msgerForm.addEventListener("submit", event => {
     //})
     //.replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
 
-    var article = new Readability(documentClone).parse();
-    let postProcessedHTML = article.textContent;
-    console.log(postProcessedHTML);
-    console.log(postProcessedHTML.length);
+    //var article = new Readability(documentClone).parse();
+    //let postProcessedHTML = article.textContent;
+    //console.log(postProcessedHTML);
+    //console.log(postProcessedHTML.length);
 
     fetch(
         'https://1f49-155-98-131-2.ngrok-free.app/on_user_message', {
@@ -98,8 +119,10 @@ msgerForm.addEventListener("submit", event => {
             )
         }
     ).then(async (chatCompletion) => {
+        
         const messages = (await chatCompletion.json()).messages;
         console.log(messages);
+        
         for (const i in messages) {
             const message = messages[i];
             console.log(message);
@@ -107,11 +130,14 @@ msgerForm.addEventListener("submit", event => {
                 // maybe mark as processed?
                 continue;
             }
+            let messageContent = message.content
+            .replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+            
             appendMessage(
                 message.name,
                 "https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png",
                 "left",
-                message.content.replace(/\\n/g, '<br>').replace(/\n/g, '<br>')
+                markup(messageContent)
             );
         }
     }).catch(err => {
@@ -127,18 +153,18 @@ function appendMessage(name, img, side, text) {
         imgHTML = '';
     }
     const msgHTML = `<div class="msg ${side}-msg">
-    ${imgHTML}
 
-    <div class="msg-bubble">
 
-    <div class="msg-info">
-    <div class="msg-info-name">${name}</div>
-    <div class="msg-info-time">${formatDate(new Date())}</div>
-    </div>
+<div class="msg-bubble">
+${imgHTML}
+<div class="msg-info">
+<div class="msg-info-name">${name}</div>
+<div class="msg-info-time">${formatDate(new Date())}</div>
+</div>
 
-    <div class="msg-text">${text}</div>
-    </div>
-    </div>`;
+<div class="msg-text">${text}</div>
+</div>
+</div>`;
 
     msgerChat.insertAdjacentHTML("beforeend", msgHTML);
     msgerChat.scrollTop += 500;

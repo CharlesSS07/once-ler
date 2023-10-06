@@ -12,7 +12,15 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": [ "readability-0.4.4/Readability.js", "chat-interface/section.html.js", "chat-interface/script.js" ],
+      "js": [
+          "jquery-3.7.0.min.js",
+          "linkify/linkify.js",
+          "linkify/linkify-jquery.js",
+          "showdown.min.js",
+          "readability-0.4.4/Readability.js",
+          "chat-interface/section.html.js",
+          "chat-interface/script.js"
+      ],
       "css": ["chat-interface/style.css"]
     }
   ],

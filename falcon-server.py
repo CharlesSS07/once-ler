@@ -19,13 +19,7 @@ class NewPageLoadedEndpoint:
         text_document = media['text']
         url = media['url']
         
-        VectorizedWebsites.parse(url, text_document, html_document)
-        
-#        try:
-#
-#        except Exception as e:
-#            print(e)
-        # log user_id on url
+        VectorizedWebsites.cache(url, text_document, html_document)
         
         resp.status = falcon.HTTP_200
         resp.complete = True
@@ -49,7 +43,7 @@ app = falcon.asgi.App(
     cors_enable=True # allows any endpoint to be accessed by the browser, could be insecure if that's not what we want
 )
 app.add_route('/on_user_message', OnUserMessageEndpoint())
-app.add_route('/parse_page', NewPageLoadedEndpoint())
+app.add_route('/on_page_load', NewPageLoadedEndpoint())
 
 async def custom_handle_uncaught_exception(req, resp, ex, params, ws=None):
     print('Error on:', req)

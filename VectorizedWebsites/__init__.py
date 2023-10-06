@@ -157,7 +157,7 @@ def overlap_split(text, max_chunk_size, chunk_overlap):
             break
         i += max_chunk_size
 
-def parse(url:str, page_readability_html: str, page_document_html: str):
+def cache(url:str, page_readability_html: str, page_document_html: str):
     
     if len(glob.glob(get_website_cache_file(url, '*')))!=0:
         # have already scraped this site...
@@ -197,7 +197,7 @@ def parse(url:str, page_readability_html: str, page_document_html: str):
     metas =   list(sorted(set([ meta.attrs['content'].strip() for meta in document.find_all('meta') if 'name' in meta.attrs and 'description' in meta.attrs['name'] ])))
     titles =  list(sorted(set([ e.get_text().strip() for e in document.find_all('title') ])))
     links =   list(sorted(set([ l['href'] for l in document.find_all('a', href=True) ])))
-    buttons = list(sorted(set([ b.text for b in document.find_all('button') ]))) # maybe get the surrounding text too?
+    buttons = list(sorted(set([ b.text.strip() for b in document.find_all('button') ]))) # maybe get the surrounding text too?
     
     print('Meta Titles', titles)
     print('Meta Tag Descriptions',  metas)
@@ -272,7 +272,7 @@ def parse(url:str, page_readability_html: str, page_document_html: str):
     
 #    embeddings.to_pickle(os.path.join(website_dir, 'embeddings.pkl'))
 
-def load_website_vectors(url: str):
+def load(url: str):
     
     # check if website_dir exists...
     embeddings = pd.DataFrame(columns=['embedding', 'chunk'])

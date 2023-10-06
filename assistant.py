@@ -119,8 +119,8 @@ Summary: ''',
 
 def strip_info(text, query):
     return language_model.predict(
-        prompt=f'''What does the following raw text say about "{query}":
-{text}
+        prompt=f'''What does the following raw text say about "{query}"? Use only information from the text to answer. If the text is irrelevant, respond with "IRRELEVANT".
+Text: {text}
 
 Relevant pieces: ''',
         **{
@@ -136,6 +136,8 @@ import VectorizedWebsites
 def on_user_message(user_id, message, page):
     
     # should lock threads on user_id
+    
+    new_messages = []
     
     try:
         
@@ -155,14 +157,13 @@ def on_user_message(user_id, message, page):
         
         chat_session = user.chat_session
         
-        new_messages = []
         
         message_from_user = GroupChatMessage(content=message, sender=user)
         new_messages.append(message_from_user.to_dict())
         chat_session.user_message_event(user, message_from_user)
         
         # load this websites vector store
-        page_data = VectorizedWebsites.load_website_vectors(page)
+        page_data = VectorizedWebsites.load(page)
         
         # embed message and look up similar ones
         message_embedding = embedding_model.encode([message])[0].astype(float)
@@ -171,12 +172,18 @@ def on_user_message(user_id, message, page):
         print('chunk_rank_ordered', chunk_rank[chunk_rank_order])
         top_chunks = page_data.chunk[chunk_rank_order]
         
-        print("Pre-Strip:", top_chunks[chunk_rank[chunk_rank_order]>0.65])
-        background_info = '\n'.join([
+        print("Pre-Strip:", '...\n\n\n\n...'.join([ str(i) for i in top_chunks[chunk_rank[chunk_rank_order]>0.65] ]))
+        background_info = [
             strip_info(chunk, message)
-            for chunk in top_chunks[chunk_rank[chunk_rank_order]>0.65]
-        ])
-        print("Background Info:", background_info)
+            for chunk in top_chunks[chunk_rank[chunk_rank_order]>0.80]
+        ]
+        print("Background Info:", '\n\n'.join(background_info))
+        background_info = [
+            '- '+info
+            for info in background_info
+            if not 'IRRELEVANT' in info
+        ]
+        print("Background Info:", '\n\n'.join(background_info))
         
         class BackgroundSupplier(agents.ProperNoun):
             def get_name(self):
@@ -186,7 +193,7 @@ def on_user_message(user_id, message, page):
             
             chat_session.message_history.send_message(
                 GroupChatMessage(
-                    content=background_info,
+                    content='\n\n'.join(background_info),
                     sender=BackgroundSupplier()
                 )
             )

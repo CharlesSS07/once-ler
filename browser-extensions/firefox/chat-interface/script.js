@@ -30,6 +30,86 @@ async function on_page_load() {
 
 on_page_load();
 
+function datetimeLink(datetimeString, summary) {
+    /**
+     Checks if event is in future or past. Makes link to a search engine if in past, and calendar for future.
+     
+     AddEvent is a good Universal "Add to Calendar" solution, but requires money. Enable later if needed.
+     AddEvent: https://www.addevent.com/c/documentation/add-to-calendar-button
+     Themes of buttons can also be customized.
+     */
+    // todo get timezone from js, use here
+    const date = Date.parse(datetimeString);
+    console.log(datetimeString);
+    if (date.compareTo(Date.today().setTimeToNow()) > 0) { // future
+        // stand in for now because AddEvent will not work yet
+        return `<a href=example.com target="_blank"><time>${datetimeString}</time></a>`;
+    } else { // past //${date.toString("MM/dd/yyyy hh:mm tt")}
+        return `<form action="http://google.com/search" target="_blank" style="margin: 0; padding: 0;display: inline;">
+<input name="q" value="${datetimeString}" hidden=true>
+<button type="submit" style="display: inline;background-color: transparent;">${datetimeString}</button>
+</form>`;
+    }
+    
+    // AddEvent button:
+//    const start = date.toString("MM/dd/yyyy hh:mm tt");
+////        const stop = date.toString("MM/dd/yyyy hh:mm tt")
+//    return `<div title="Add to Calendar" class="addeventatc" data-styling="none">
+//Add to Calendar
+//<span class="start">${start}</span>
+//<span class="timezone">America/Los_Angeles</span>
+//<span class="title">Event from UU-GPT</span>
+//<span class="description">${summary}</span>
+//</div>`;
+}
+
+function formatDates(text) {
+    /**
+     "Convoludes" the text by running a date parsing function over every group of 1-4 words.
+     */
+    
+    const words = text.split(' ');
+    let formattedWords = [];
+    const wordCount = words.length;
+    let previousWindowWasDate = false;
+    let previousWindow = '';
+    
+    for (let i = 0;i < wordCount;i++) {
+        
+        let j = i+1;
+        const window = '';
+        for (;j < wordCount+1;j++) {
+            const window = words.slice(i, Math.min(j, wordCount)).join(' ');
+            // console.log(`Window ${window} at ${i}, ${j}, ${Date.parse(window)}`);
+            
+            if (window.length>3 && Date.parse(window)!=null) { // valid date
+                previousWindowWasDate = true;
+            } else { // not valid date
+                if (previousWindowWasDate) { // if previous window had a valid date register it
+                    previousWindowWasDate = false;
+                    formattedWords.push(datetimeLink(previousWindow, text));
+                    i = j-1;
+                    break; // found the date so add it to formattedWords, and skip out of here
+                }
+            }
+            
+            previousWindow = window;
+            
+        }
+        
+        if (previousWindowWasDate) { // whole entire substring ^ was a date so add it, formatted
+            previousWindowWasDate = false;
+            formattedWords.push(datetimeLink(previousWindow, text));
+            i = j-1;
+        } else {
+            formattedWords.push(words[i]); // found no dates so add whole window
+        }
+        
+    }
+    
+    return formattedWords.join(' ');
+}
+
 var md2HTMLconverter = new showdown.Converter({
     tasklists: true,
     encodeEmails: true,
@@ -39,14 +119,13 @@ var md2HTMLconverter = new showdown.Converter({
 md2HTMLconverter.setFlavor('github');
 function markup(text) {
     try {
-        let html = md2HTMLconverter.makeHtml(text);
-        // do markdown in-browser. this makes links work, code, etc.
+        let html = md2HTMLconverter.makeHtml(formatDates(text));
+        // do markdown in-browser. this makes ui elements for links, code, emails, time/date, etc.
         console.log(html);
         return $('<div/>')
         .html(html)
         .linkify()
         .html();
-        
     } catch (e) {
         console.log('could not markup.');
         console.error(e);
@@ -73,35 +152,6 @@ msgerForm.addEventListener("submit", event => {
         markup(msgText)
     );
     msgerInput.value = "";
-
-    //const documentClone = document.cloneNode(true);
-    //documentClone.body.removeChild(documentClone.getElementById('chatinterface'));
-    //documentClone.querySelectorAll('style').forEach((element) => {
-    //element.remove();
-    //});
-    //documentClone.querySelectorAll('script').forEach((element) => {
-    //element.remove();
-    //});
-    //
-    //// remove all class=... and style= ... from HTML before sending off
-    //// this gets rid of lots of nearly useless text
-    //// we want to remove as much as possibile to speed up GPT call, and transfer speeds
-    //let postProcessedHTML = documentClone.body.innerHTML;
-    //console.log(postProcessedHTML.length);
-    //postProcessedHTML = postProcessedHTML.replaceAll(/(<[a-z]+.*?)(class=".*?")(.*?>)/g, // to remove all class=...
-    //(_, g1, g2, g3) => {
-    //return `${g1.trim()} ${g3.trim()}`;
-    //})
-    //.replaceAll(/(<[a-z]+.*?)(style=".*?")(.*?>)/g, // to remove all style=...
-    //(_, g1, g2, g3) => {
-    //return `${g1.trim()} ${g3.trim()}`;
-    //})
-    //.replaceAll('\t', '').replace('\n\r', '').replace('\r', '').replace('\n', '');
-
-    //var article = new Readability(documentClone).parse();
-    //let postProcessedHTML = article.textContent;
-    //console.log(postProcessedHTML);
-    //console.log(postProcessedHTML.length);
 
     fetch(
         'https://1f49-155-98-131-2.ngrok-free.app/on_user_message', {
@@ -153,15 +203,12 @@ function appendMessage(name, img, side, text) {
         imgHTML = '';
     }
     const msgHTML = `<div class="msg ${side}-msg">
-
-
 <div class="msg-bubble">
 ${imgHTML}
 <div class="msg-info">
 <div class="msg-info-name">${name}</div>
 <div class="msg-info-time">${formatDate(new Date())}</div>
 </div>
-
 <div class="msg-text">${text}</div>
 </div>
 </div>`;

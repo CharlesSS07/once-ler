@@ -1,12 +1,12 @@
 
-#import falcon
 import falcon.asgi
 
 import asyncio
 
+import config
+import tools
+import websitedata
 import assistant
-
-import VectorizedWebsites
 
 class NewPageLoadedEndpoint:
 
@@ -19,7 +19,7 @@ class NewPageLoadedEndpoint:
         text_document = media['text']
         url = media['url']
         
-        VectorizedWebsites.cache(url, text_document, html_document)
+        websitedata.cache(url, text_document, html_document)
         
         resp.status = falcon.HTTP_200
         resp.complete = True
@@ -34,7 +34,7 @@ class OnUserMessageEndpoint:
         message = media['message']
         page = media['page']
         
-        resp.media = {'messages': assistant.on_user_message(user_id, message, page)}
+        resp.media = {'messages': assistant.events.on_user_message(user_id, message, page)}
         
         resp.status = falcon.HTTP_200
         resp.complete = True

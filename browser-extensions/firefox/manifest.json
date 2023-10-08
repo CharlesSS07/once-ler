@@ -17,6 +17,8 @@
           "linkify/linkify.js",
           "linkify/linkify-jquery.js",
           "showdown.min.js",
+          "date-en-US.js",
+          "atc.min.js",
           "readability-0.4.4/Readability.js",
           "chat-interface/section.html.js",
           "chat-interface/script.js"

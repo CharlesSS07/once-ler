@@ -1,0 +1,180 @@
+descriptions:
+- Apply for college, schedule a visit, and find all the undergraduate and graduate
+  admissions info you need right here. Welcome to the U of You.
+- Utah Admissions
+links:
+  '#back-to-top': '<a aria-label="back-to-top" class="back-to-top-btn" href="#back-to-top"
+    id="back-to-top-btn" title="back to top">
+
+    <i aria-hidden="true" class="fal fa-arrow-up"></i>
+
+    </a>'
+  https://admissions.utah.edu/: '<a class="uu-footer-dept-logo" href="https://admissions.utah.edu/">
+
+    <img alt="University of Utah Block U Logo" src="https://admissions.utah.edu/wp-content/themes/umctheme3/img/blocku.svg"
+    title="University of Utah"/>
+
+    </a>'
+  https://admissions.utah.edu/admitted-students/: <a href="https://admissions.utah.edu/admitted-students/"><span>Admitted
+    Students</span></a>
+  https://admissions.utah.edu/admitted-students/admitted-freshman-next-steps/: <a
+    href="https://admissions.utah.edu/admitted-students/admitted-freshman-next-steps/"><span>Admitted
+    Freshman Next Steps</span></a>
+  https://admissions.utah.edu/admitted-students/admitted-graduate-next-steps/: <a
+    href="https://admissions.utah.edu/admitted-students/admitted-graduate-next-steps/"><span>Admitted
+    Graduate Next Steps</span></a>
+  https://admissions.utah.edu/admitted-students/admitted-non-degree-seeking-student-next-steps/: <a
+    href="https://admissions.utah.edu/admitted-students/admitted-non-degree-seeking-student-next-steps/"><span>Admitted
+    Non-Degree Seeking Student Next Steps</span></a>
+  https://admissions.utah.edu/admitted-students/admitted-non-traditional-student-next-steps/: <a
+    href="https://admissions.utah.edu/admitted-students/admitted-non-traditional-student-next-steps/"><span>Admitted
+    Non-Traditional Student Next Steps</span></a>
+  https://admissions.utah.edu/admitted-students/admitted-second-bachelors-student-next-steps/: "<a\
+    \ href=\"https://admissions.utah.edu/admitted-students/admitted-second-bachelors-student-next-steps/\"\
+    ><span>Admitted Second Bachelor\u2019s Student Next Steps</span></a>"
+  https://admissions.utah.edu/admitted-students/admitted-transfer-student-next-steps/: <a
+    href="https://admissions.utah.edu/admitted-students/admitted-transfer-student-next-steps/"><span>Admitted
+    Transfer Student Next Steps</span></a>
+  https://admissions.utah.edu/admitted-students/confirm-intent-to-enroll/: <a href="https://admissions.utah.edu/admitted-students/confirm-intent-to-enroll/"><span>Confirm
+    Intent to Enroll</span></a>
+  https://admissions.utah.edu/admitted-students/returning-student-next-steps/: <a
+    href="https://admissions.utah.edu/admitted-students/returning-student-next-steps/"><span>Admitted
+    Returning Student Next Steps</span></a>
+  https://admissions.utah.edu/apply/: <a href="https://admissions.utah.edu/apply/"
+    target="">Apply Today</a>
+  https://admissions.utah.edu/apply/early-admission/: <a href="https://admissions.utah.edu/apply/early-admission/"><span>Early
+    Admission</span></a>
+  https://admissions.utah.edu/apply/freshman-students/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/freshman-students/" id="cta-fresh-1" target="">Freshman</a>
+  https://admissions.utah.edu/apply/freshman-students/undergraduate-admissions-standards/: <a
+    href="https://admissions.utah.edu/apply/freshman-students/undergraduate-admissions-standards/"><span>Undergraduate
+    Admissions Standards</span></a>
+  https://admissions.utah.edu/apply/graduate-admissions/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/graduate-admissions/" id="cta-grad-1"
+    target="">Graduate</a>
+  https://admissions.utah.edu/apply/high-school-university-program-orientation/: <a
+    href="https://admissions.utah.edu/apply/high-school-university-program-orientation/"><span>High
+    School University Program &amp; Orientation</span></a>
+  https://admissions.utah.edu/apply/international/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/international/" id="cta-intr-1" target="">International</a>
+  https://admissions.utah.edu/apply/international/english-proficiency/: <a href="https://admissions.utah.edu/apply/international/english-proficiency/"><span>English
+    Proficiency</span></a>
+  https://admissions.utah.edu/apply/international/i-20-information/: <a href="https://admissions.utah.edu/apply/international/i-20-information/"><span>I-20
+    Information</span></a>
+  https://admissions.utah.edu/apply/international/international-freshman-admissions-undergraduate-costs/: <a
+    href="https://admissions.utah.edu/apply/international/international-freshman-admissions-undergraduate-costs/"><span>International
+    Freshman Admissions &amp; Undergraduate Costs</span></a>
+  https://admissions.utah.edu/apply/international/international-graduate-admissions-graduate-costs/: <a
+    href="https://admissions.utah.edu/apply/international/international-graduate-admissions-graduate-costs/"><span>International
+    Graduate Admissions &amp; Graduate Costs</span></a>
+  https://admissions.utah.edu/apply/international/international-non-traditional/: <a
+    href="https://admissions.utah.edu/apply/international/international-non-traditional/"><span>International
+    Non-Traditional</span></a>
+  https://admissions.utah.edu/apply/international/international-returning-admissions/: <a
+    href="https://admissions.utah.edu/apply/international/international-returning-admissions/"><span>International
+    Returning Admissions</span></a>
+  https://admissions.utah.edu/apply/international/international-second-bachelors-admissions/: "<a\
+    \ href=\"https://admissions.utah.edu/apply/international/international-second-bachelors-admissions/\"\
+    ><span>International Second Bachelor\u2019s Admissions</span></a>"
+  https://admissions.utah.edu/apply/international/international-transfer-admissions/: <a
+    href="https://admissions.utah.edu/apply/international/international-transfer-admissions/"><span>International
+    Transfer Admissions</span></a>
+  https://admissions.utah.edu/apply/non-degree-seeking/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/non-degree-seeking/" id="cta-nonds-1"
+    target="">Non-Degree Seeking</a>
+  https://admissions.utah.edu/apply/non-traditional/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/non-traditional/" id="cta-nont-1" target="">Non-Traditional</a>
+  https://admissions.utah.edu/apply/returning-students/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/returning-students/" id="cta-rtrn-1" target="">Returning</a>
+  https://admissions.utah.edu/apply/second-bachelors-admissions/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/second-bachelors-admissions/" id="cta-secb-1"
+    target="">Second Bachelor's</a>
+  https://admissions.utah.edu/apply/track-your-application/: <a href="https://admissions.utah.edu/apply/track-your-application/"><span>Track
+    Your Application</span></a>
+  https://admissions.utah.edu/apply/transfer-students/: <a class="future-students__type"
+    href="https://admissions.utah.edu/apply/transfer-students/" id="cta-tran-1" target="">Transfer</a>
+  https://admissions.utah.edu/apply/transfer-students/transfer-admission-standards/: <a
+    href="https://admissions.utah.edu/apply/transfer-students/transfer-admission-standards/"><span>Transfer
+    Admission Standards</span></a>
+  https://admissions.utah.edu/financial-aid-scholarships/: <a href="https://admissions.utah.edu/financial-aid-scholarships/"
+    target="">Explore Financial Aid &amp; Scholarships <i class="fa-solid fa-angle-right"></i></a>
+  https://admissions.utah.edu/financial-aid-scholarships/scholarships/: <a href="https://admissions.utah.edu/financial-aid-scholarships/scholarships/"><span>Scholarships</span></a>
+  https://admissions.utah.edu/financial-aid-scholarships/scholarships/for-utah/: <a
+    href="https://admissions.utah.edu/financial-aid-scholarships/scholarships/for-utah/"><span>For
+    Utah</span></a>
+  https://admissions.utah.edu/financial-aid-scholarships/scholarships/international-scholarships/: <a
+    href="https://admissions.utah.edu/financial-aid-scholarships/scholarships/international-scholarships/"><span>International
+    Scholarships</span></a>
+  https://admissions.utah.edu/financial-aid-scholarships/scholarships/the-guarantee-scholarship/: <a
+    href="https://admissions.utah.edu/financial-aid-scholarships/scholarships/the-guarantee-scholarship/"><span>The
+    Guarantee Scholarship</span></a>
+  https://admissions.utah.edu/information-resources/: <a href="https://admissions.utah.edu/information-resources/"><span>Information
+    &amp; Resources</span></a>
+  https://admissions.utah.edu/information-resources/academic-department-resources/: <a
+    href="https://admissions.utah.edu/information-resources/academic-department-resources/"><span>Academic
+    Department Resources</span></a>
+  https://admissions.utah.edu/information-resources/appeals/: <a href="https://admissions.utah.edu/information-resources/appeals/"><span>Appeals</span></a>
+  https://admissions.utah.edu/information-resources/deferment/: <a href="https://admissions.utah.edu/information-resources/deferment/"><span>Deferment</span></a>
+  https://admissions.utah.edu/information-resources/faqs/: <a href="https://admissions.utah.edu/information-resources/faqs/"><span>FAQs</span></a>
+  https://admissions.utah.edu/information-resources/high-school-counselor-resources/: <a
+    href="https://admissions.utah.edu/information-resources/high-school-counselor-resources/"><span>High
+    School Counselor Resources</span></a>
+  https://admissions.utah.edu/information-resources/prior-learning-credit/: <a href="https://admissions.utah.edu/information-resources/prior-learning-credit/"><span>Prior
+    Learning Credit</span></a>
+  https://admissions.utah.edu/information-resources/residency/: <a href="https://admissions.utah.edu/information-resources/residency/"><span>Residency</span></a>
+  https://admissions.utah.edu/information-resources/student-life/: <a href="https://admissions.utah.edu/information-resources/student-life/"><span>Student
+    Life</span></a>
+  https://admissions.utah.edu/project-request-form/: <a href="https://admissions.utah.edu/project-request-form/"><span>Project
+    Request Form</span></a>
+  https://admissions.utah.edu/request-info/: <a href="https://admissions.utah.edu/request-info/"
+    target="">Request Information</a>
+  https://admissions.utah.edu/visit-engage/: <a class="button" href="https://admissions.utah.edu/visit-engage/"
+    id="cta-schat-1" target="">Schedule a Tour</a>
+  https://admissions.utah.edu/visit-engage/find-your-counselor/: <a href="https://admissions.utah.edu/visit-engage/find-your-counselor/"
+    target="">Talk to an Admissions Counselor</a>
+  https://admissions.utah.edu/visit-engage/meet-our-student-ambassadors/: <a href="https://admissions.utah.edu/visit-engage/meet-our-student-ambassadors/"><span>Meet
+    Our Student Ambassadors</span></a>
+  https://admissions.utah.edu/visit-engage/upcoming-events/: <a href="https://admissions.utah.edu/visit-engage/upcoming-events/"><span>Upcoming
+    Events</span></a>
+  https://admissions.utah.edu/visit-engage/virtual-campus-tour/: <a href="https://admissions.utah.edu/visit-engage/virtual-campus-tour/"><span>Virtual
+    Campus Tour</span></a>
+  https://attheu.utah.edu/media-contacts/: <a href="https://attheu.utah.edu/media-contacts/"
+    rel="noopener" target="_blank">Media Contacts</a>
+  https://catalog.utah.edu/#/home: <a href="https://catalog.utah.edu/#/home" rel="noopener"
+    target="_blank">Undergraduate Catalog</a>
+  https://go.utah.edu/cas/login?TARGET=https%3A%2F%2Fstudent.apps.utah.edu%2Fuofu%2Fstu%2FEnrollmentConfirmation%2F: <a
+    href="https://go.utah.edu/cas/login?TARGET=https%3A%2F%2Fstudent.apps.utah.edu%2Fuofu%2Fstu%2FEnrollmentConfirmation%2F"
+    rel="noopener" target="_blank">Confirm Your Enrollment</a>
+  https://twitter.com/uutah: '<a href="https://twitter.com/uutah" rel="noopener" target="_blank">
+
+    <i aria-hidden="true" class="fab fa-twitter"></i>
+
+    </a>'
+  https://utah.edu/: <a href="https://utah.edu/" rel="noopener" target="_blank" title="University
+    of Utah"></a>
+  https://utah.edu/disclaimer/: <a href="https://utah.edu/disclaimer/" rel="noopener"
+    target="_blank">Disclaimer</a>
+  https://utah.edu/nondiscrimination/: <a href="https://utah.edu/nondiscrimination/"
+    rel="noopener" target="_blank">Nondiscrimination &amp; Accessibility</a>
+  https://utah.edu/privacy/: <a href="https://utah.edu/privacy/" rel="noopener" target="_blank">Privacy</a>
+  https://www.facebook.com/universityofutah: '<a href="https://www.facebook.com/universityofutah"
+    rel="noopener" target="_blank">
+
+    <i aria-hidden="true" class="fab fa-facebook-f"></i>
+
+    </a>'
+  https://www.instagram.com/universityofutah/: '<a href="https://www.instagram.com/universityofutah/"
+    rel="noopener" target="_blank">
+
+    <i aria-hidden="true" class="fab fa-instagram"></i>
+
+    </a>'
+  https://www.utah.edu: <a href="https://www.utah.edu" rel="noopener" target="_blank"></a>
+  https://www.youtube.com/user/theuniversityofutah: '<a href="https://www.youtube.com/user/theuniversityofutah"
+    rel="noopener" target="_blank">
+
+    <i aria-hidden="true" class="fab fa-youtube"></i>
+
+    </a>'
+titles:
+- "Admissions \u2013 The University of Utah"

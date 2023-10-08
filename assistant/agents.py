@@ -1,13 +1,20 @@
-
-from vertexai.language_models import TextGenerationModel
-language_model = TextGenerationModel.from_pretrained("text-bison")
+import typing
+from typing import List, Optional
+from typing import Any, Generator, Tuple
 
 class ProperNoun():
     
     def get_name(self):
         raise Exception('The get_name method of a ProperNoun must be implemented!')
 
+from vertexai.language_models import TextGenerationModel
+
+language_model = TextGenerationModel.from_pretrained("text-bison")
+
 class Agent(ProperNoun):
+
+    class ResponseBlocked(Exception):
+        pass
     
     def __init__(self, model, agent_name, context, prediction_parameters):
         self.model = model
@@ -15,11 +22,27 @@ class Agent(ProperNoun):
         self.context = context
         self.prediction_parameters = prediction_parameters
     
-    def __str__(self):
-        return 'Agent: '+self.agent_name
-    
     def get_name(self):
         return self.agent_name
+    
+    def __str__(self):
+        return self.get_name()
+    
+    def complete(self, prompt:str, stop_sequences: typing.Optional[typing.List[str]] = None):
+        response = self.model.predict(
+            prompt=prompt,
+            stop_sequences=stop_sequences,
+            **self.prediction_parameters
+        )
+#        print(dir(response))
+#        print(response)
+#        print(dir(response.raw_prediction_response))
+#        print(response.raw_prediction_response)
+#        print(dir(response.safety_attributes))
+#        print(response.safety_attributes)
+        if response.is_blocked:
+            raise ResponseBlocked(response)
+        return response.text.strip()
 
 def UUExternalCustomerServiceAgent():
     return Agent(

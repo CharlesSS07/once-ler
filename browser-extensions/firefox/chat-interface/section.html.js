@@ -1,12 +1,13 @@
+
+if (document.getElementById('chatinterface')) {
+    document.getElementById('chatinterface').remove();
+}
+
 const view = document.createElement('div');
 view.style.position = 'fixed';
 view.style.top = '50%';
 view.style.left = '60%';
 view.style.zIndex = '999999';
-
-console.log('jQuery version:');
-console.log($);
-//console.log('jQuery verison: '+jQuery().jquery);
 
 
 // bad way to insert the html but I couldn't figure out a better method with the browser extension loading

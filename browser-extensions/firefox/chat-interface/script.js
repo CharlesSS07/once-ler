@@ -1,6 +1,8 @@
 
 const user_id = 'neo';
 
+const chatServerEndpoint = 'https://6155-155-98-131-2.ngrok-free.app';
+
 async function on_page_load() {
     
     const documentClone = document.cloneNode(true);
@@ -10,7 +12,7 @@ async function on_page_load() {
     let postProcessedHTML = await article.content;
 
     fetch(
-        'https://1f49-155-98-131-2.ngrok-free.app/on_page_load', {
+        `${chatServerEndpoint}/on_page_load`, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -30,6 +32,19 @@ async function on_page_load() {
 
 on_page_load();
 
+function trimAny(str, chars) { // stolen from https://stackoverflow.com/questions/26156292/trim-specific-character-from-a-string
+    var start = 0,
+        end = str.length;
+
+    while(start < end && chars.indexOf(str[start]) >= 0)
+        ++start;
+
+    while(end > start && chars.indexOf(str[end - 1]) >= 0)
+        --end;
+
+    return (start > 0 || end < str.length) ? str.substring(start, end) : str;
+}
+
 function datetimeLink(datetimeString, summary) {
     /**
      Checks if event is in future or past. Makes link to a search engine if in past, and calendar for future.
@@ -39,15 +54,15 @@ function datetimeLink(datetimeString, summary) {
      Themes of buttons can also be customized.
      */
     // todo get timezone from js, use here
-    const date = Date.parse(datetimeString);
+    const date = Date.parse(trimAny(datetimeString, ',.?!<>;:\'"[]{}-_=+@#$%^&*()'));
     console.log(datetimeString);
     if (date.compareTo(Date.today().setTimeToNow()) > 0) { // future
         // stand in for now because AddEvent will not work yet
         return `<a href=example.com target="_blank"><time>${datetimeString}</time></a>`;
     } else { // past //${date.toString("MM/dd/yyyy hh:mm tt")}
-        return `<form action="http://google.com/search" target="_blank" style="margin: 0; padding: 0;display: inline;">
+        return `<form action="http://google.com/search" target="_blank">
 <input name="q" value="${datetimeString}" hidden=true>
-<button type="submit" style="display: inline;background-color: transparent;">${datetimeString}</button>
+<button type="submit" class='button.link'>${datetimeString}</button>
 </form>`;
     }
     
@@ -82,7 +97,8 @@ function formatDates(text) {
             const window = words.slice(i, Math.min(j, wordCount)).join(' ');
             // console.log(`Window ${window} at ${i}, ${j}, ${Date.parse(window)}`);
             
-            if (window.length>3 && Date.parse(window)!=null) { // valid date
+            if (window.length>3 && Date.parse(
+                trimAny(window, ',.?!<>;:\'"[]{}-_=+@#$%^&*()'))!=null) { // valid date
                 previousWindowWasDate = true;
             } else { // not valid date
                 if (previousWindowWasDate) { // if previous window had a valid date register it
@@ -119,10 +135,13 @@ var md2HTMLconverter = new showdown.Converter({
 md2HTMLconverter.setFlavor('github');
 function markup(text) {
     try {
-        let html = md2HTMLconverter.makeHtml(formatDates(text));
+        console.log(text);
+        let html = '<h3>' + formatDates(text) + '</h3>';
+        console.log(html);
+        html = md2HTMLconverter.makeHtml(html);
         // do markdown in-browser. this makes ui elements for links, code, emails, time/date, etc.
         console.log(html);
-        return $('<div/>')
+        return $('<div>')
         .html(html)
         .linkify()
         .html();
@@ -154,7 +173,7 @@ msgerForm.addEventListener("submit", event => {
     msgerInput.value = "";
 
     fetch(
-        'https://1f49-155-98-131-2.ngrok-free.app/on_user_message', {
+        `${chatServerEndpoint}/on_user_message`, {
             method: "POST",
             mode: "cors",
             headers: {

@@ -26,7 +26,7 @@ class NewPageLoadedEndpoint:
 
 class OnUserMessageEndpoint:
 
-    async def on_post(self, req, resp):
+    async def on_websocket(self, req, ws):
     
         media = await req.get_media()
         

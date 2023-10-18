@@ -48,7 +48,7 @@ def UUExternalCustomerServiceAgent():
     return Agent(
         model=language_model,
         context='You are a customer service bot representing the University of Utah. The user has access to your website, and you are helping them find and understand what they are looking for. Always rephrase the users question, and then quote from the webpage to answer their quersion. Provide direct links to what the user is looking for if the links are avaliable.',
-        agent_name='Mr. University of Utah',
+        agent_name='University of Utah',
         prediction_parameters={
             'max_output_tokens':256,
             'temperature':0,
@@ -87,7 +87,7 @@ def QAAgent():
     return Agent(
         model=language_model,
         context='You are a customer service representative helping an internet user understand a website.',
-        agent_name='Mr. Answer',
+        agent_name='Answer',
         prediction_parameters={
             'max_output_tokens':256,
             'temperature':0,

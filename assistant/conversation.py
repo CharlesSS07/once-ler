@@ -61,19 +61,19 @@ class AgentChatSession():
         self.message_history.send_message(message)
         self.member_list[user.get_name()] = user
         
-    def get_context(self):
-        users = [ self.member_list[a].get_name() for a in self.member_list if type(self.member_list[a])==User ]
-        agent_list = [ self.member_list[a].get_name() for a in self.member_list if type(self.member_list[a])==assistant.agents.Agent ]
-        ret = f'''The following is a transcript from a conversation with the following user(s):
-{', '.join(users)}
-And the following chat bot agent(s):
-{', '.join(agent_list)}'''
-        return ret
+#    def get_context(self):
+#        users = [ self.member_list[a].get_name() for a in self.member_list if type(self.member_list[a])==User ]
+#        agent_list = [ self.member_list[a].get_name() for a in self.member_list if type(self.member_list[a])==assistant.agents.Agent ]
+#        ret = f'''The following is a transcript from a conversation with the following user(s):
+#{', '.join(users)}
+#And the following chat bot agent(s):
+#{', '.join(agent_list)}'''
+#        return ret
     
     def get_agent_response(self, agent, record_response=True):
         self.member_list[agent.agent_name] = agent
-        prompt = str(agent.context) + '\n' + str(self.get_context()) + '\n\nTranscript:\n' + self.message_history.text_transcript() + '\n' + str(agent.agent_name) + ': '
-        print('Prompt:')
+        prompt = str(agent.context) + '\n' + '\n\nTranscript:\n' + self.message_history.text_transcript() + '\n' + str(agent.agent_name) + ': '
+        print('\n\n##### Prompt:')
         print(prompt)
         response = agent.complete(
             prompt=prompt,

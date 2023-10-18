@@ -12,6 +12,24 @@ view.style.zIndex = '999999';
 
 // bad way to insert the html but I couldn't figure out a better method with the browser extension loading
 
+//<div class="msg left-msg">
+//    <div
+//    class="msg-img"
+//    style="background-image: url(https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png)"
+//    ></div>
+//
+//        <div class="msg-bubble">
+//        <div class="msg-info">
+//            <div class="msg-info-name">UU-Ai</div>
+//            <div class="msg-info-time">--:--</div>
+//        </div>
+//
+//        <div class="msg-text">
+//Hi, I'm the UU's chat AI, here to direct you around this website. Try me before emailing admissions (I'm faster...).
+//        </div>
+//    </div>
+//</div>
+
 view.innerHTML = `<section class="msger">
     
     <header class="msger-header">
@@ -24,23 +42,7 @@ view.innerHTML = `<section class="msger">
     </header>
 
     <main class="msger-chat">
-        <div class="msg left-msg">
-            <div
-            class="msg-img"
-            style="background-image: url(https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png)"
-            ></div>
-
-                <div class="msg-bubble">
-                <div class="msg-info">
-                    <div class="msg-info-name">UU-Ai</div>
-                    <div class="msg-info-time">--:--</div>
-                </div>
-
-                <div class="msg-text">
-Hi, I'm the UU's chat AI, here to direct you around this website. Try me before emailing admissions (I'm faster...).
-                </div>
-            </div>
-        </div>
+        
     </main>
 
     <form class="msger-inputarea">

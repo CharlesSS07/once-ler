@@ -80,7 +80,7 @@ chatinterace {
   #width: 100%;
   max-width: 867px;
   max-height: 400px;
-  margin: 25px 10px;
+  margin: 12px 5px;
   height: calc(100% - 50px);
   border: var(--msger-border);
   border-radius: 5px;
@@ -91,7 +91,7 @@ chatinterace {
 .msger-header {
   display: flex;
   justify-content: space-between;
-  padding: 10px;
+  padding: 2px;
   border-bottom: var(--msger-border);
   background: #eee;
   color: #666;
@@ -100,7 +100,7 @@ chatinterace {
 .msger-chat {
   flex: 1;
   overflow-y: auto;
-  padding: 10px;
+  padding: 2px;
 }
 .msger-chat::-webkit-scrollbar {
   width: 6px;
@@ -117,17 +117,18 @@ chatinterace {
   margin-bottom: 10px;
 }
 .msg:last-of-type {
-  margin: 0;
+  margin: 0px;
+  padding: 0;
 }
 .msg-img {
   width: 50px;
   height: 50px;
-  margin-right: 10px;
+  margin-right: 1px;
   background: #ddd;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
-  border-radius: 50%;
+  border-radius: 10%;
 }
 .msg-bubble {
   max-width: 450px;
@@ -142,7 +143,7 @@ chatinterace {
   margin-bottom: 10px;
 }
 .msg-info-name {
-  margin-right: 10px;
+  margin-right: 5px;
   font-weight: bold;
 }
 .msg-info-time {
@@ -168,7 +169,7 @@ chatinterace {
 
 .msger-inputarea {
   display: flex;
-  padding: 10px;
+  padding: 5px;
   border-top: var(--msger-border);
   background: #eee;
 }
@@ -183,7 +184,7 @@ chatinterace {
   background: #ddd;
 }
 .msger-send-btn {
-  margin-left: 10px;
+  margin-left: 5px;
   background: rgb(0, 196, 65);
   color: #fff;
   font-weight: bold;

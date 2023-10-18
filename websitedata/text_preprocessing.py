@@ -50,8 +50,11 @@ def overlap_chunk(text, max_chunk_size, chunk_overlap):
     
     l = len(text)
     
-    i = max_chunk_size
-    yield text[:max_chunk_size].strip()
+    i = chunk_overlap + max_chunk_size + chunk_overlap
+    yield text[:chunk_overlap+max_chunk_size+chunk_overlap].strip()
+    
+    if i + max_chunk_size + chunk_overlap > l:
+        return
     
     while True:
         yield text[ i - chunk_overlap : i + max_chunk_size + chunk_overlap ].strip()

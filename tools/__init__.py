@@ -72,6 +72,20 @@ def summarize_chunks(chunks):
         master_summery = combine_and_summarize(
             master_summery, summaries.pop(0)
         )
-#        print('\n\nMaster Summary:', master_summery)
+        print('\n\nMaster Summary:', master_summery)
     
     return master_summery
+
+def summarize_chunks_collapsing(chunks):
+    
+    summaries = chunks#async_api_calls(summarize, chunks)
+    
+    if len(summaries)%2!=0:
+        summaries[-2] = summaries[-2]+'\n\n'+summaries[-1]
+        summaries = summaries[:-1]
+    
+    while len(summaries)>1:
+        print(summaries)
+        summaries = async_api_calls(summarize, [a+b for a,b in zip(summaries[::2], summaries[1::2])])
+    
+    return summaries[0]

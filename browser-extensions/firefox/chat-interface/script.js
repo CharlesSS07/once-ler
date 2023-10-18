@@ -1,7 +1,9 @@
 
 const user_id = 'neo';
 
-const chatServerEndpoint = 'https://6155-155-98-131-2.ngrok-free.app';
+const chatServerEndpoint = '6155-155-98-131-2.ngrok-free.app';
+
+const userMessageSocket = new WebSocket(`wss:${chatServerEndpoint}/user_message_socketserver`);
 
 async function on_page_load() {
     
@@ -12,7 +14,7 @@ async function on_page_load() {
     let postProcessedHTML = await article.content;
 
     fetch(
-        `${chatServerEndpoint}/on_page_load`, {
+        `https://${chatServerEndpoint}/on_page_load`, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -30,7 +32,7 @@ async function on_page_load() {
     );
 }
 
-on_page_load();
+//on_page_load();
 
 function trimAny(str, chars) { // stolen from https://stackoverflow.com/questions/26156292/trim-specific-character-from-a-string
     var start = 0,
@@ -132,13 +134,12 @@ var md2HTMLconverter = new showdown.Converter({
     emoji: true,
     openLinksInNewWindow: true
 });
-md2HTMLconverter.setFlavor('github');
+//md2HTMLconverter.setFlavor('github');
 function markup(text) {
     try {
         console.log(text);
-        let html = '<h3>' + formatDates(text) + '</h3>';
+        html = md2HTMLconverter.makeHtml('<div>'+text+'</div>'); // formatDates // maybe reincorporate when dates become useful again...
         console.log(html);
-        html = md2HTMLconverter.makeHtml(html);
         // do markdown in-browser. this makes ui elements for links, code, emails, time/date, etc.
         console.log(html);
         return $('<div>')
@@ -155,65 +156,109 @@ function markup(text) {
 
 // chat interface stolen from: https://codepen.io/sajadhsm/pen/odaBdd
 
-const msgerForm = document.querySelector(".msger-inputarea");
-const msgerInput = document.querySelector(".msger-input");
-const msgerChat = document.querySelector(".msger-chat");
-msgerForm.addEventListener("submit", event => {
-    event.preventDefault();
+const msgerForm = $(".msger-inputarea");
+const msgerInput = $(".msger-input");
+const msgerChat = $(".msger-chat");
 
-    const msgText = msgerInput.value;
-    if (!msgText) return;
+appendMessage(
+    "UU Ai",
+    "https://templates.utah.edu/_main-v3-1/images/template/apple-touch-icon.png",
+    "left",
+    markup(
+        "Hi, I'm the UU's chat AI, here to direct you around this website. Try me before emailing admissions (I'm faster...). "
+    )
+)
+
+msgerForm.attr('disabled', true);
+userMessageSocket.onopen = (event) => {
+    
+    userMessageSocket.send(JSON.stringify({'user_id':user_id}));
+    
+    appendSystemMessage("Connected");
+    
+    msgerForm.attr('disabled', false);
+    msgerForm.on("submit", event => {
+        event.preventDefault();
+
+        const msgText = msgerInput.val();
+        if (!msgText) return;
+
+        appendMessage(
+            "You",
+            "",
+            "right",
+            markup(msgText)
+        );
+        msgerInput.val("");
+        userMessageSocket.send(JSON.stringify(
+            {
+//                user_id: user_id,
+                message: msgText,
+                page: window.location.href
+            }
+        ));
+//        fetch(
+//            `${chatServerEndpoint}/on_user_message`, {
+//                method: "POST",
+//                mode: "cors",
+//                headers: {
+//                    'Content-Type': 'application/json'
+//                },
+//                body: JSON.stringify(
+//                    {
+//                        user_id: user_id,
+//                        message: msgText,
+//                        page: window.location.href
+//                    }
+//                )
+//            }
+//        ).then(async (chatCompletion) => {
+//
+//            const messages = (await chatCompletion.json()).messages;
+//            console.log(messages);
+//
+//            for (const i in messages) {
+//                const message = messages[i];
+//                console.log(message);
+//                if (message.name=="User") {
+//                    // maybe mark as processed?
+//                    continue;
+//                }
+//                let messageContent = message.content
+//                .replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
+//
+//                appendMessage(
+//                    message.name,
+//                    "https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png",
+//                    "left",
+//                    markup(messageContent)
+//                );
+//            }
+//        }).catch(err => {
+//            console.error(err);
+//        });
+        
+    });
+};
+
+userMessageSocket.onmessage = (event) => {
+    const message = JSON.parse(event.data);
+    console.log(message);
+    if (message.name=="User") {
+        // maybe mark as processed?
+        return;
+    }
+    let messageContent = message.content
+    .replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
 
     appendMessage(
-        "You",
-        "https://media.istockphoto.com/id/1298261537/vector/blank-man-profile-head-icon-placeholder.jpg?s=170667a&w=is&k=20&c=OySd4zJilw82P4k-sQ72kYckL122oUiy5Z5VTnFQi90=",
-        "right",
-        markup(msgText)
+        message.name,
+        "https://templates.utah.edu/_main-v3-1/images/template/apple-touch-icon.png",
+//        "https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png",
+        "left",
+        markup(messageContent)
     );
-    msgerInput.value = "";
-
-    fetch(
-        `${chatServerEndpoint}/on_user_message`, {
-            method: "POST",
-            mode: "cors",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(
-                {
-                    user_id: user_id,
-                    message: msgText,
-                    page: window.location.href
-                }
-            )
-        }
-    ).then(async (chatCompletion) => {
-        
-        const messages = (await chatCompletion.json()).messages;
-        console.log(messages);
-        
-        for (const i in messages) {
-            const message = messages[i];
-            console.log(message);
-            if (message.name=="User") {
-                // maybe mark as processed?
-                continue;
-            }
-            let messageContent = message.content
-            .replace(/\\n/g, '<br>').replace(/\n/g, '<br>');
-            
-            appendMessage(
-                message.name,
-                "https://admissions.utah.edu/wp-content/themes/umctheme3/favicon-32x32.png",
-                "left",
-                markup(messageContent)
-            );
-        }
-    }).catch(err => {
-        console.error(err);
-    });
-    
-});
+}
 
 function appendMessage(name, img, side, text) {
     //   Simple solution for small apps
@@ -232,8 +277,28 @@ ${imgHTML}
 </div>
 </div>`;
 
-    msgerChat.insertAdjacentHTML("beforeend", msgHTML);
-    msgerChat.scrollTop += 500;
+    appendHTMLtoChat(msgHTML);
+}
+
+function appendSystemMessage(text) {
+    //   Simple solution for small apps
+    const systemCSSclass = 'left';
+    const msgHTML = `<div class="msg ${systemCSSclass}-msg">
+<div class="msg-bubble">
+<div class="msg-info">
+<div class="msg-info-time">${formatDate(new Date())}</div>
+</div>
+<div class="msg-text"><b>${text}</b></div>
+</div>
+</div>`;
+
+    appendHTMLtoChat(msgHTML);
+}
+
+function appendHTMLtoChat(msgHTML) {
+
+    msgerChat.append(msgHTML);
+    msgerChat.animate({ scrollTop: $(document).height() }, "slow");
 }
 
 function formatDate(date) {

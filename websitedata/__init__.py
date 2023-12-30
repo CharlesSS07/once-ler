@@ -4,7 +4,7 @@ from . import text_preprocessing
 import config
 import tools
 
-#import requests
+import requests
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 from markdownify import markdownify
@@ -83,10 +83,10 @@ class CachedWebsite():
         self.hostname = hostname
         self.DEFAULT_DIRECTORY_INDEX_PAGE_FILENAME = 'direrctory-index-page.html'
         self.valid = False
-        if not os.path.exists(self.get_website_cache_dir()):
-            self.__scrape()
-        else:
-            self.valid = True
+#        if not os.path.exists(self.get_website_cache_dir()):
+#            self.__scrape()
+#        else:
+#            self.valid = True
         
     def valid_cache(self):
         return self.valid # maybe check last cacheing time from database
@@ -95,6 +95,8 @@ class CachedWebsite():
         return os.path.join(config.website_cache_dir, self.hostname)
     
     def get_cached_webpage(self, url:str, page_hash='abcd'):
+        # TODO: look up urls, and their cache_file in a database, using a hash computed by client js
+        # ^ much more robust than current approach
         # TODO: use page_hash to look up the page by content, and then url translation as backup
         URL = urlparse(url)
         if URL.hostname!=self.hostname:
@@ -111,7 +113,6 @@ class CachedWebsite():
                 self)
         
         cache_file = os.path.join(config.website_cache_dir, URL.hostname, URL.path[1:])
-        
         
         if os.path.isdir(cache_file):
             if os.path.exists(os.path.join(cache_file, self.DEFAULT_DIRECTORY_INDEX_PAGE_FILENAME)):
@@ -132,7 +133,25 @@ class CachedWebsite():
             page = CachedWebpage(url, cache_file, self)
         
         if page==None:
-            raise CachedWebsite.WebpageNotCached('No cache found for ' + url)
+            print('No cache found for ' + url)
+            print('Creating one')
+            path, filename = os.path.split(cache_file)
+            os.makedirs(path, exist_ok=True)
+            # could use wget with --force-directories
+            
+            if os.path.isdir(cache_file):
+                cache_file = os.path.join(cache_file, self.DEFAULT_DIRECTORY_INDEX_PAGE_FILENAME)
+            
+            with open(cache_file, 'w') as f:
+                f.write(requests.get(url).text)
+                f.flush()
+            page = CachedWebpage(
+                url,
+                cache_file,
+                self)
+            self.valid = True
+            return page # This just-in-time downloading was added to make things work for demo
+#            raise CachedWebsite.WebpageNotCached('No cache found for ' + url)
         
         if not page.get_page_hash()==page_hash:
             self.valid = False
